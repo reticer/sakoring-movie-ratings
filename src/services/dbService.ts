@@ -65,7 +65,7 @@ export const dbService = {
     return true;
   },
   addScore: async (scoreData: { movie_id: number, person_id: number, score: number }): Promise<boolean> => {
-    const { error } = await supabase.from('scores').insert([scoreData]);
+    const { error } = await supabase.from('scores').insert([{ ...scoreData, created_at: new Date().toISOString() }]);
     if (error) throw error;
     return true;
   },

@@ -83,6 +83,12 @@ export const Dashboard: React.FC = () => {
       {/* Main Content Area */}
       <div className="px-6 md:px-16 -mt-16 relative z-20 space-y-16 md:space-y-24">
         
+        {/* Carousels */}
+        <div className="space-y-10 md:space-y-16">
+          <CarouselRow title="Highest Rated" movies={highestRatedList} />
+          <CarouselRow title="Recently Added" movies={recentList} />
+        </div>
+
         {/* Statistics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           <StatCard 
@@ -102,13 +108,6 @@ export const Dashboard: React.FC = () => {
             icon={Users} 
           />
         </div>
-
-        {/* Carousels */}
-        <div className="space-y-10 md:space-y-16">
-          <CarouselRow title="Highest Rated" movies={highestRatedList} />
-          <CarouselRow title="Recently Added" movies={recentList} />
-        </div>
-
       </div>
     </div>
   );

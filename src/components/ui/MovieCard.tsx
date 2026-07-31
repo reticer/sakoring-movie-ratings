@@ -8,9 +8,10 @@ import { dbService } from '../../services/dbService';
 interface MovieCardProps {
   movie: Movie;
   onDelete?: () => void;
+  rank?: number;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete }) => {
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) => {
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -52,14 +53,27 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete }) => {
     <>
       <div 
         onClick={() => navigate(`/movies/${movie.id}`)}
-        className="relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] hover:z-30 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/70 border border-slate-800/80"
+        className={`relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] hover:z-30 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/70 border border-slate-800/80 ${rank ? 'ml-6 md:ml-10' : ''}`}
       >
+        {/* Netflix-style Rank Overlay */}
+        {rank !== undefined && (
+          <span 
+            className="absolute -left-6 md:-left-10 -bottom-2 md:-bottom-4 text-7xl md:text-9xl font-black text-slate-900 z-50 pointer-events-none select-none drop-shadow-2xl"
+            style={{ 
+              WebkitTextStroke: '2px #f8fafc',
+              textShadow: '0 0 15px rgba(0,0,0,0.8)'
+            }}
+          >
+            {rank}
+          </span>
+        )}
+
         {/* Poster Image */}
         {movie.poster_url ? (
           <img 
             src={movie.poster_url} 
             alt={movie.title} 
-            className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110" 
+            className="w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110" 
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-slate-700">

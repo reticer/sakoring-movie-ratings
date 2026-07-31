@@ -49,7 +49,7 @@ export const dbService = {
     const { data: movie, error: movieError } = await supabase.from('movies').select('*').eq('id', id).single();
     if (movieError) throw movieError;
 
-    const { data: scores, error: scoresError } = await supabase.from('scores').select(`id, score, person_id, people(name)`).eq('movie_id', id);
+    const { data: scores, error: scoresError } = await supabase.from('scores').select(`id, score, person_id, comment, people(name)`).eq('movie_id', id);
     if (scoresError) throw scoresError;
 
     return { ...movie, scoreList: scores } as Movie;
@@ -64,7 +64,7 @@ export const dbService = {
     if (error) throw error;
     return true;
   },
-  addScore: async (scoreData: { movie_id: number, person_id: number, score: number }): Promise<boolean> => {
+  addScore: async (scoreData: { movie_id: number, person_id: number, score: number, comment?: string }): Promise<boolean> => {
     const { error } = await supabase.from('scores').insert([{ ...scoreData, created_at: new Date().toISOString() }]);
     if (error) throw error;
     return true;

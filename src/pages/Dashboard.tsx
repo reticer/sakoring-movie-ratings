@@ -12,6 +12,7 @@ export const Dashboard: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [peopleCount, setPeopleCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,18 +37,26 @@ export const Dashboard: React.FC = () => {
     if (!movies.length) return { highestRatedMovie: null, highestRatedList: [], recentList: [], globalAvg: '0.0' };
 
     const validScores = movies.filter(m => m.average_score && m.average_score > 0);
-    const sortedByScore = [...validScores].sort((a, b) => (b.average_score || 0) - (a.average_score || 0));
     
-    const highestRatedMovie = sortedByScore.length > 0 ? sortedByScore[0] : movies[0];
-    
+    // Filter highest rated by selected year
+    const filteredForHighest = filterYear === 'all' 
+      ? validScores 
+      : validScores.filter(m => m.release_year?.toString() === filterYear);
+
+    const sortedByScore = [...filteredForHighest].sort((a, b) => (b.average_score || 0) - (a.average_score || 0));
+    const highestRatedMovie = sortedByScore.length > 0 ? sortedByScore[0] : (movies[0] || null);
     const highestRatedList = sortedByScore.slice(0, 10);
+    
     const recentList = [...movies].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
     
     const totalScore = validScores.reduce((sum, m) => sum + Number(m.average_score), 0);
     const globalAvg = validScores.length ? (totalScore / validScores.length).toFixed(1) : '0.0';
 
     return { highestRatedMovie, highestRatedList, recentList, globalAvg };
-  }, [movies]);
+  }, [movies, filterYear]);
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = ["all", ...Array.from({ length: currentYear - 2000 + 1 }, (_, i) => (currentYear - i).toString())];
 
   if (loading) {
     return (
@@ -85,7 +94,21 @@ export const Dashboard: React.FC = () => {
         
         {/* Carousels */}
         <div className="space-y-10 md:space-y-16">
-          <CarouselRow title="Highest Rated" movies={highestRatedList} />
+          <CarouselRow 
+            title="Highest Rated" 
+            movies={highestRatedList} 
+            actionElement={
+              <select 
+                value={filterYear} 
+                onChange={e => setFilterYear(e.target.value)}
+                className="bg-slate-900/80 border border-slate-700/80 text-white rounded-xl px-4 py-2 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors text-sm"
+              >
+                {yearOptions.map(y => (
+                  <option key={y} value={y}>{y === "all" ? "All Time" : y}</option>
+                ))}
+              </select>
+            }
+          />
           <CarouselRow title="Recently Added" movies={recentList} />
         </div>
 

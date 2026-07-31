@@ -9,6 +9,7 @@ export interface Score {
   movie_id: number;
   person_id: number;
   score: number;
+  comment?: string;
   created_at?: string;
   people?: { name: string };
   count?: number; // Sometimes returned as count from Supabase

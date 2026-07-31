@@ -15,6 +15,7 @@ export const MovieDetail: React.FC = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<string>('');
   const [newScore, setNewScore] = useState<string>('');
+  const [newComment, setNewComment] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -44,13 +45,23 @@ export const MovieDetail: React.FC = () => {
 
   const handleAddScore = async () => {
     if (!movie || !id || !selectedPersonId || !newScore) return;
+    
+    if (!window.confirm("ไม่สามารถแก้ไขข้อความและคะแนนได้แล้วนะ")) {
+      return;
+    }
+    
     try {
       setIsSaving(true);
       const pId = Number(selectedPersonId);
       const scoreVal = parseFloat(newScore);
 
-      // Add the new score
-      await dbService.addScore({ movie_id: Number(id), person_id: pId, score: scoreVal });
+      // Add the new score with comment
+      await dbService.addScore({ 
+        movie_id: Number(id), 
+        person_id: pId, 
+        score: scoreVal, 
+        comment: newComment.trim() || undefined 
+      });
 
       // Calculate new average
       const currentScores = movie.scoreList?.map(s => s.score) || [];
@@ -64,6 +75,7 @@ export const MovieDetail: React.FC = () => {
       setIsAddingScore(false);
       setSelectedPersonId('');
       setNewScore('');
+      setNewComment('');
       setError('');
     } catch (err: any) {
       setError("Error adding score: " + err.message);
@@ -181,7 +193,7 @@ export const MovieDetail: React.FC = () => {
                  )}
                  {isAddingScore && (
                    <div className="flex gap-3">
-                     <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">Cancel</button>
+                     <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">Cancel</button>
                      <button onClick={handleAddScore} disabled={isSaving || !selectedPersonId || !newScore} className="flex items-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 disabled:opacity-50 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
                        {isSaving ? <Loader2 size={20} className="animate-spin"/> : null}
                        Submit Rating
@@ -191,27 +203,36 @@ export const MovieDetail: React.FC = () => {
               </div>
 
               {isAddingScore && (
-                <div className="mb-8 flex flex-col sm:flex-row items-center gap-4 bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl shadow-black/50">
-                  <select 
-                    value={selectedPersonId}
-                    onChange={e => setSelectedPersonId(e.target.value)}
-                    className="flex-1 bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
-                  >
-                    <option value="">-- Select Family Member --</option>
-                    {unratedPeople.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                  <select 
-                    value={newScore}
-                    onChange={e => setNewScore(e.target.value)}
-                    className="flex-1 bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
-                  >
-                    <option value="">-- Score --</option>
-                    {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
-                      <option key={val} value={val}>{val.toFixed(1)}</option>
-                    ))}
-                  </select>
+                <div className="mb-8 flex flex-col gap-4 bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl shadow-black/50">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <select 
+                      value={selectedPersonId}
+                      onChange={e => setSelectedPersonId(e.target.value)}
+                      className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
+                    >
+                      <option value="">-- Select Family Member --</option>
+                      {unratedPeople.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <select 
+                      value={newScore}
+                      onChange={e => setNewScore(e.target.value)}
+                      className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
+                    >
+                      <option value="">-- Score --</option>
+                      {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
+                        <option key={val} value={val}>{val.toFixed(1)}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <textarea 
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    placeholder="Optional review or comment..."
+                    rows={3}
+                    className="w-full bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 shadow-inner transition-colors resize-none placeholder:text-slate-500"
+                  />
                 </div>
               )}
 
@@ -227,15 +248,22 @@ export const MovieDetail: React.FC = () => {
                   else if (score.score < 8) { borderCol = 'border-slate-300/30'; textCol = 'text-slate-300'; bgCol = 'bg-slate-300/10'; }
 
                   return (
-                    <div key={score.id} className="bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-800/80 hover:border-slate-700/80 transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:-translate-y-2 group">
-                      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mb-4 shadow-inner transition-colors duration-300 ${borderCol} ${textCol} ${bgCol}`}>
-                        {score.people?.name?.substring(0,2).toUpperCase()}
+                    <div key={score.id} className={`bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-800/80 transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:-translate-y-2 group ${score.comment ? 'col-span-2 sm:col-span-2 lg:col-span-2' : ''}`}>
+                      <div className="flex flex-col items-center text-center">
+                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mb-4 shadow-inner transition-colors duration-300 ${borderCol} ${textCol} ${bgCol}`}>
+                          {score.people?.name?.substring(0,2).toUpperCase()}
+                        </div>
+                        <span className="text-slate-50 font-bold text-lg line-clamp-1 mb-2 group-hover:text-white transition-colors">{score.people?.name}</span>
+                        <div className={`flex items-center gap-1.5 font-black text-2xl transition-colors duration-300 ${textCol}`}>
+                          <Star size={24} className="fill-current drop-shadow-md" />
+                          {score.score.toFixed(1)}
+                        </div>
                       </div>
-                      <span className="text-slate-50 font-bold text-lg text-center line-clamp-1 mb-2 group-hover:text-white transition-colors">{score.people?.name}</span>
-                      <div className={`flex items-center gap-1.5 font-black text-2xl transition-colors duration-300 ${textCol}`}>
-                        <Star size={24} className="fill-current drop-shadow-md" />
-                        {score.score.toFixed(1)}
-                      </div>
+                      {score.comment && (
+                        <p className="mt-4 text-slate-300 italic text-sm font-medium border-t border-slate-800/80 pt-4 w-full text-center">
+                          "{score.comment}"
+                        </p>
+                      )}
                     </div>
                   );
                 })}

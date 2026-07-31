@@ -15,6 +15,7 @@ export const AddMovie: React.FC = () => {
 
   const [people, setPeople] = useState<Person[]>([]);
   const [scores, setScores] = useState<Record<string, string>>({});
+  const [comments, setComments] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const TMDB_API_KEY = localStorage.getItem('TMDB_API_KEY') || import.meta.env.VITE_TMDB_API_KEY || 'YOUR_TMDB_API_KEY';
@@ -83,10 +84,18 @@ export const AddMovie: React.FC = () => {
     setScores(prev => ({ ...prev, [personId]: val }));
   };
 
+  const handleCommentChange = (personId: string, val: string) => {
+    setComments(prev => ({ ...prev, [personId]: val }));
+  };
+
   const handleSaveMovie = async () => {
     const validScores = Object.entries(scores)
       .filter(([_, val]) => val !== '' && val !== null)
-      .map(([personId, val]) => ({ person_id: Number(personId), score: parseFloat(val) }));
+      .map(([personId, val]) => ({ 
+        person_id: Number(personId), 
+        score: parseFloat(val),
+        comment: comments[personId]?.trim() || undefined
+      }));
 
     if (validScores.length === 0) {
       setError("Please provide at least 1 rating.");
@@ -198,23 +207,34 @@ export const AddMovie: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {people.map(person => (
-                  <div key={person.id} className="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800/80">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">
-                        {person.name.substring(0, 2).toUpperCase()}
+                  <div key={person.id} className="flex flex-col gap-3 p-4 bg-slate-900/60 rounded-2xl border border-slate-800/80">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">
+                          {person.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="font-medium text-slate-200">{person.name}</span>
                       </div>
-                      <span className="font-medium text-slate-200">{person.name}</span>
+                      <select 
+                        value={scores[person.id] || ''}
+                        onChange={e => handleScoreChange(person.id.toString(), e.target.value)}
+                        className="bg-slate-900 border border-slate-700 text-slate-50 rounded px-4 py-2 focus:outline-none focus:border-red-600 font-medium cursor-pointer"
+                      >
+                        <option value="">-- Rate --</option>
+                        {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
+                          <option key={val} value={val}>{val.toFixed(1)}</option>
+                        ))}
+                      </select>
                     </div>
-                    <select 
-                      value={scores[person.id] || ''}
-                      onChange={e => handleScoreChange(person.id.toString(), e.target.value)}
-                      className="bg-slate-900 border border-slate-700 text-slate-50 rounded px-4 py-2 focus:outline-none focus:border-red-600 font-medium cursor-pointer"
-                    >
-                      <option value="">-- Rate --</option>
-                      {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
-                        <option key={val} value={val}>{val.toFixed(1)}</option>
-                      ))}
-                    </select>
+                    {scores[person.id] && (
+                      <textarea
+                        value={comments[person.id] || ''}
+                        onChange={e => handleCommentChange(person.id.toString(), e.target.value)}
+                        placeholder={`Optional review for ${person.name}...`}
+                        rows={2}
+                        className="w-full bg-slate-800/40 border border-slate-700/60 text-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 shadow-inner transition-colors resize-none text-sm placeholder:text-slate-500"
+                      />
+                    )}
                   </div>
                 ))}
               </div>

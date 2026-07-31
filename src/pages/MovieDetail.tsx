@@ -18,6 +18,8 @@ export const MovieDetail: React.FC = () => {
   const [newComment, setNewComment] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -43,19 +45,18 @@ export const MovieDetail: React.FC = () => {
     }
   };
 
-  const handleAddScore = async () => {
+  const handleAddScoreClick = () => {
     if (!movie || !id || !selectedPersonId || !newScore) return;
-    
-    if (!window.confirm("ไม่สามารถแก้ไขข้อความและคะแนนได้แล้วนะ")) {
-      return;
-    }
-    
+    setShowConfirmModal(true);
+  };
+
+  const executeAddScore = async () => {
+    setShowConfirmModal(false);
     try {
       setIsSaving(true);
       const pId = Number(selectedPersonId);
       const scoreVal = parseFloat(newScore);
 
-      // Add the new score with comment
       await dbService.addScore({ 
         movie_id: Number(id), 
         person_id: pId, 
@@ -63,8 +64,7 @@ export const MovieDetail: React.FC = () => {
         comment: newComment.trim() || undefined 
       });
 
-      // Calculate new average
-      const currentScores = movie.scoreList?.map(s => s.score) || [];
+      const currentScores = movie?.scoreList?.map(s => s.score) || [];
       const allScores = [...currentScores, scoreVal];
       const sum = allScores.reduce((acc, curr) => acc + curr, 0);
       const newAvg = parseFloat((sum / allScores.length).toFixed(2));
@@ -194,7 +194,7 @@ export const MovieDetail: React.FC = () => {
                  {isAddingScore && (
                    <div className="flex gap-3">
                      <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">Cancel</button>
-                     <button onClick={handleAddScore} disabled={isSaving || !selectedPersonId || !newScore} className="flex items-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 disabled:opacity-50 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
+                     <button onClick={handleAddScoreClick} disabled={isSaving || !selectedPersonId || !newScore} className="flex items-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 disabled:opacity-50 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
                        {isSaving ? <Loader2 size={20} className="animate-spin"/> : null}
                        Submit Rating
                      </button>
@@ -292,6 +292,20 @@ export const MovieDetail: React.FC = () => {
                 {isDeleting ? <Loader2 className="animate-spin" size={20} /> : null}
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Rating Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80 text-center">
+            <AlertCircle size={56} className="mx-auto text-amber-500 mb-6 drop-shadow-md" />
+            <h3 className="text-2xl font-black text-white mb-8 tracking-tighter">ส่งได้ครั้งเดียวแก้ไม่ได้แล้วนะ</h3>
+            <div className="flex gap-4">
+              <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">ยกเลิก</button>
+              <button onClick={executeAddScore} className="flex-1 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">ยืนยัน</button>
             </div>
           </div>
         </div>

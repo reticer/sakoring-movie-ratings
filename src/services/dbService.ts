@@ -27,16 +27,27 @@ export const dbService = {
     if (error) throw error;
     return !!data;
   },
-  addMovieWithScores: async (movieData: Partial<Movie>, scoresData: { person_id: number, score: number }[]): Promise<boolean> => {
+  addMovieWithScores: async (movieData: Partial<Movie>, scoresData: { person_id: number, score: number, comment?: string }[]): Promise<boolean> => {
     const { data: movie, error: movieError } = await supabase.from('movies').insert([movieData]).select().single();
     if (movieError) throw movieError;
     
-    const scoresToInsert = scoresData.map(s => ({ ...s, movie_id: movie.id }));
+    const scoresToInsert = scoresData.map(s => ({ ...s, movie_id: movie.id, created_at: new Date().toISOString() }));
     const { error: scoresError } = await supabase.from('scores').insert(scoresToInsert);
     
     if (scoresError) {
-      await supabase.from('movies').delete().eq('id', movie.id);
-      throw scoresError;
+      console.warn("Failed to bulk insert scores with comment/created_at, falling back...", scoresError.message);
+      const fallbackScoresToInsert = scoresData.map(({comment, ...rest}) => ({ ...rest, movie_id: movie.id, created_at: new Date().toISOString() }));
+      const { error: fallbackError } = await supabase.from('scores').insert(fallbackScoresToInsert);
+      
+      if (fallbackError) {
+         console.warn("Failed again, falling back to minimal payload without created_at...", fallbackError.message);
+         const minimalScoresToInsert = scoresData.map(({comment, ...rest}) => ({ ...rest, movie_id: movie.id }));
+         const { error: finalError } = await supabase.from('scores').insert(minimalScoresToInsert);
+         if (finalError) {
+           await supabase.from('movies').delete().eq('id', movie.id);
+           throw finalError;
+         }
+      }
     }
     return true;
   },
@@ -49,8 +60,17 @@ export const dbService = {
     const { data: movie, error: movieError } = await supabase.from('movies').select('*').eq('id', id).single();
     if (movieError) throw movieError;
 
-    const { data: scores, error: scoresError } = await supabase.from('scores').select(`id, score, person_id, comment, people(name)`).eq('movie_id', id);
-    if (scoresError) throw scoresError;
+    let scores = [];
+    const { data: scoresWithComment, error: scoresErrorWithComment } = await supabase.from('scores').select(`id, score, person_id, comment, people(name)`).eq('movie_id', id);
+    
+    if (scoresErrorWithComment) {
+      console.warn("Could not fetch comment column, falling back to basic score fetch:", scoresErrorWithComment.message);
+      const { data: fallbackScores, error: fallbackError } = await supabase.from('scores').select(`id, score, person_id, people(name)`).eq('movie_id', id);
+      if (fallbackError) throw fallbackError;
+      scores = fallbackScores || [];
+    } else {
+      scores = scoresWithComment || [];
+    }
 
     return { ...movie, scoreList: scores } as Movie;
   },
@@ -65,8 +85,19 @@ export const dbService = {
     return true;
   },
   addScore: async (scoreData: { movie_id: number, person_id: number, score: number, comment?: string }): Promise<boolean> => {
-    const { error } = await supabase.from('scores').insert([{ ...scoreData, created_at: new Date().toISOString() }]);
-    if (error) throw error;
+    const { error: insertError } = await supabase.from('scores').insert([{ ...scoreData, created_at: new Date().toISOString() }]);
+    
+    if (insertError) {
+      console.warn("Failed to insert score with comment/created_at, falling back to basic insert:", insertError.message);
+      const { comment, ...basicScoreData } = scoreData;
+      const { error: fallbackError } = await supabase.from('scores').insert([{ ...basicScoreData, created_at: new Date().toISOString() }]);
+      
+      if (fallbackError) {
+         console.warn("Failed again, falling back to minimal payload without created_at:", fallbackError.message);
+         const { error: finalError } = await supabase.from('scores').insert([basicScoreData]);
+         if (finalError) throw finalError;
+      }
+    }
     return true;
   },
   updateScore: async (id: number, score: number): Promise<boolean> => {

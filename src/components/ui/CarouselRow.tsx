@@ -3,6 +3,7 @@ import type { Movie } from '../../types';
 import { MovieCard } from './MovieCard';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LiveCommentCarousel } from './LiveCommentCarousel';
 
 interface CarouselRowProps {
   title: string;
@@ -35,8 +36,9 @@ export const CarouselRow: React.FC<CarouselRowProps> = ({ title, movies, actionE
       ) : (
         <div className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-visible hide-scrollbar scroll-smooth snap-x snap-mandatory py-8 -mx-6 px-6 md:-mx-16 md:px-16">
           {movies.map((movie, index) => (
-            <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start">
+            <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col">
               <MovieCard movie={movie} rank={title === "Highest Rated" ? index + 1 : undefined} />
+              <LiveCommentCarousel scores={movie.scoreList || (movie as any).scores} />
             </div>
           ))}
         </div>

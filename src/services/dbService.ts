@@ -52,9 +52,19 @@ export const dbService = {
     return true;
   },
   getMoviesWithScores: async (): Promise<Movie[]> => {
-    const { data, error } = await supabase.from('movies').select(`*, scores (count)`).order('created_at', { ascending: false });
-    if (error) throw error;
-    return data as Movie[];
+    let movies = [];
+    const { data: dataWithComments, error: errComments } = await supabase.from('movies').select(`*, scores(id, score, comment, people(name))`).order('created_at', { ascending: false });
+    
+    if (errComments) {
+      console.warn("Failed to fetch movies with comments, falling back:", errComments.message);
+      const { data: dataFallback, error: errFallback } = await supabase.from('movies').select(`*, scores(id, score, people(name))`).order('created_at', { ascending: false });
+      if (errFallback) throw errFallback;
+      movies = dataFallback;
+    } else {
+      movies = dataWithComments;
+    }
+    
+    return movies as Movie[];
   },
   getMovieById: async (id: number): Promise<Movie> => {
     const { data: movie, error: movieError } = await supabase.from('movies').select('*').eq('id', id).single();

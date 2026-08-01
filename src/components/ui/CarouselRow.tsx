@@ -35,12 +35,15 @@ export const CarouselRow: React.FC<CarouselRowProps> = ({ title, movies, actionE
         </div>
       ) : (
         <div className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-visible hide-scrollbar scroll-smooth snap-x snap-mandatory py-8 -mx-6 px-6 md:-mx-16 md:px-16">
-          {movies.map((movie, index) => (
-            <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col">
-              <MovieCard movie={movie} rank={title === "Highest Rated" ? index + 1 : undefined} />
-              <LiveCommentCarousel scores={movie.scoreList || (movie as any).scores} />
-            </div>
-          ))}
+          {movies.map((movie, index) => {
+            const currentRank = title === "Highest Rated" ? index + 1 : undefined;
+            return (
+              <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col">
+                <MovieCard movie={movie} rank={currentRank} />
+                <LiveCommentCarousel scores={movie.scoreList || (movie as any).scores} rank={currentRank} />
+              </div>
+            );
+          })}
         </div>
       )}
       

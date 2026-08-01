@@ -9,8 +9,8 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/moviei.png",
-      "sizes": "192x192 512x512",
+      "src": "/finalmovie.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     }

@@ -221,7 +221,7 @@ export const AddMovie: React.FC = () => {
                         className="bg-slate-900 border border-slate-700 text-slate-50 rounded px-4 py-2 focus:outline-none focus:border-red-600 font-medium cursor-pointer"
                       >
                         <option value="">-- Rate --</option>
-                        {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
+                        {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
                           <option key={val} value={val}>{val.toFixed(1)}</option>
                         ))}
                       </select>

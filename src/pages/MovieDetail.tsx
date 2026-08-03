@@ -221,7 +221,7 @@ export const MovieDetail: React.FC = () => {
                       className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
                     >
                       <option value="">-- Score --</option>
-                      {Array.from({length: 20}, (_, i) => (i + 1) * 0.5).map(val => (
+                      {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
                         <option key={val} value={val}>{val.toFixed(1)}</option>
                       ))}
                     </select>

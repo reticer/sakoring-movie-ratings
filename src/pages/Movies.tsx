@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Loader2, FilterX, CheckSquare, Square, Trash2, X, AlertTriangle } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Movie } from '../types';
@@ -19,6 +19,25 @@ export const Movies: React.FC = () => {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Infinite scroll
+  const [visibleCount, setVisibleCount] = useState(20);
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const lastElementRef = (node: HTMLDivElement | null) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount(prev => prev + 20);
+      }
+    }, { rootMargin: '200px' });
+    if (node) observer.current.observe(node);
+  };
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [searchQuery, sortBy]);
 
   const loadMovies = async () => {
     try {
@@ -195,7 +214,7 @@ export const Movies: React.FC = () => {
           style={{ pointerEvents: 'none' }}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-5"
         >
-          {filteredMovies.map((movie) => (
+          {filteredMovies.slice(0, visibleCount).map((movie) => (
             <div key={movie.id} style={{ pointerEvents: 'auto' }} className="relative">
               {/* Selection overlay */}
               {selectMode && (
@@ -224,6 +243,13 @@ export const Movies: React.FC = () => {
             </div>
           ))}
         </motion.div>
+      )}
+
+      {/* Infinite Scroll Trigger */}
+      {!loading && visibleCount < filteredMovies.length && (
+        <div ref={lastElementRef} className="w-full py-10 flex justify-center">
+          <Loader2 className="animate-spin text-slate-500" size={24} />
+        </div>
       )}
 
       {/* Floating delete bar */}

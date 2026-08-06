@@ -35,32 +35,16 @@ export const Chat: React.FC = () => {
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'chat_messages' },
-        (payload) => {
-          // If old record has id, remove just that message; otherwise clear all
-          if (payload.old && (payload.old as ChatMessage).id) {
-            setMessages((prev) => prev.filter((m) => m.id !== (payload.old as ChatMessage).id));
-          } else {
-            setMessages([]);
-          }
+        () => {
+          // On any delete event, clear all messages from UI
+          // (works for bulk delete — no individual message delete feature yet)
+          setMessages([]);
         }
       )
       .subscribe();
 
-    // Listen for clear signal dispatched by Settings page
-    const handleStorageEvent = (e: StorageEvent | Event) => {
-      const key = (e as StorageEvent).key ?? null;
-      if (key === 'chat_clear_signal' || key === null) {
-        const signal = localStorage.getItem('chat_clear_signal');
-        if (signal) {
-          setMessages([]);
-        }
-      }
-    };
-    window.addEventListener('storage', handleStorageEvent);
-
     return () => {
       supabase.removeChannel(channel);
-      window.removeEventListener('storage', handleStorageEvent);
     };
   }, []);
 

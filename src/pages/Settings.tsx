@@ -88,9 +88,6 @@ export const Settings: React.FC = () => {
     try {
       const { error } = await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       if (error) throw error;
-      // Notify Chat page to clear messages immediately
-      localStorage.setItem('chat_clear_signal', Date.now().toString());
-      window.dispatchEvent(new Event('storage'));
       setShowDeleteChatModal(false);
     } catch (err: any) {
       console.error('Delete chat failed:', err);

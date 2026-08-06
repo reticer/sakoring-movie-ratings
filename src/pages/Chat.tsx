@@ -164,7 +164,7 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-80px)] md:h-[100dvh] w-full max-w-4xl mx-auto bg-slate-900 overflow-hidden relative">
+    <div className="flex flex-col h-[calc(100dvh-88px)] md:h-[100dvh] w-full max-w-4xl mx-auto bg-slate-900 overflow-hidden relative">
       {/* Chat Header */}
       <header className="bg-slate-900/80 backdrop-blur-xl transform-gpu border-b border-slate-800 p-4 sticky top-0 z-10 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3">

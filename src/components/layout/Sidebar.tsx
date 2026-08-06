@@ -52,7 +52,7 @@ export const Sidebar: React.FC = () => {
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-3xl border-t border-white/5 z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-3xl border-t border-white/5 z-[9999] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex justify-around items-center h-[88px]">
           {navItems.map((item) => (
             <NavLink

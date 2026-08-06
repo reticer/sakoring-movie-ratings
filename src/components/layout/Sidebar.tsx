@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-3xl border-t border-white/5 z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-        <div className="flex justify-around items-center h-[72px]">
+        <div className="flex justify-around items-center h-[88px]">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -66,10 +66,10 @@ export const Sidebar: React.FC = () => {
             >
               {({ isActive }) => (
                 <>
-                  <div className={`p-1.5 rounded-full transition-all duration-300 ${isActive ? 'bg-red-600/20 text-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : ''}`}>
-                    <item.icon size={22} />
+                  <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'bg-red-600/20 text-red-500 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : ''}`}>
+                    <item.icon size={26} />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{item.label}</span>
                 </>
               )}
             </NavLink>

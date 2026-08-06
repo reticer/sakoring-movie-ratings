@@ -1,14 +1,17 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Film, PlusCircle, Users, Settings as SettingsIcon, Clapperboard } from 'lucide-react';
+import { Home, Film, PlusCircle, MessageCircle, Settings as SettingsIcon, Clapperboard } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export const Sidebar: React.FC = () => {
+  const { t } = useLanguage();
+  
   const navItems = [
-    { to: "/", icon: Home, label: "Home" },
-    { to: "/movies", icon: Film, label: "Movies" },
-    { to: "/add-movie", icon: PlusCircle, label: "Add Movie" },
-    { to: "/people", icon: Users, label: "Family" },
-    { to: "/settings", icon: SettingsIcon, label: "Settings" }
+    { to: "/", icon: Home, label: t('nav.home') },
+    { to: "/movies", icon: Film, label: t('nav.movies') },
+    { to: "/add-movie", icon: PlusCircle, label: t('nav.add_movie') },
+    { to: "/chat", icon: MessageCircle, label: t('nav.chat') },
+    { to: "/settings", icon: SettingsIcon, label: t('nav.settings') }
   ];
 
   return (

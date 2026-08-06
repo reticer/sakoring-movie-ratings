@@ -4,24 +4,25 @@ import { Dashboard } from './pages/Dashboard';
 import { AddMovie } from './pages/AddMovie';
 import { Movies } from './pages/Movies';
 import { MovieDetail } from './pages/MovieDetail';
-import { People } from './pages/People';
-import { ImportExport } from './pages/ImportExport';
+import { Chat } from './pages/Chat';
 import { Settings } from './pages/Settings';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 export default function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/add-movie" element={<AddMovie />} />
-          <Route path="/movies" element={<Movies />} />
-          <Route path="/movies/:id" element={<MovieDetail />} />
-          <Route path="/people" element={<People />} />
-          <Route path="/import-export" element={<ImportExport />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/add-movie" element={<AddMovie />} />
+            <Route path="/movies" element={<Movies />} />
+            <Route path="/movies/:id" element={<MovieDetail />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </LanguageProvider>
   );
 }

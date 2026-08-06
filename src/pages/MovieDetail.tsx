@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, AlertTriangle } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Movie, Person } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { staggerContainer, springUp, scaleIn } from '../utils/animations';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const MovieDetail: React.FC = () => {
+  const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
@@ -19,8 +23,7 @@ export const MovieDetail: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -86,7 +89,7 @@ export const MovieDetail: React.FC = () => {
 
   const unratedPeople = people.filter(p => !movie?.scoreList?.find(s => s.person_id === p.id));
 
-  const confirmDelete = async () => {
+  const handleDeleteMovie = async () => {
     if (!movie) return;
     try {
       setIsDeleting(true);
@@ -95,7 +98,7 @@ export const MovieDetail: React.FC = () => {
     } catch (err) {
       setError("Failed to delete movie.");
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -110,7 +113,7 @@ export const MovieDetail: React.FC = () => {
       <AlertCircle size={56} className="mx-auto text-red-500 mb-6 drop-shadow-md" />
       <h3 className="text-3xl font-black text-slate-50 mb-3 tracking-tighter">Error</h3>
       <p className="text-slate-400 mb-8 font-medium text-lg">{error}</p>
-      <button onClick={() => navigate('/movies')} className="bg-slate-800/60 hover:bg-slate-700/80 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 border border-slate-700/50 shadow-xl hover:-translate-y-1">Return to Library</button>
+      <button onClick={() => navigate('/movies')} className="bg-slate-800/60 hover:bg-slate-700/80 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('common.back')}</button>
     </div>
   );
 
@@ -120,7 +123,6 @@ export const MovieDetail: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-slate-900 pb-24">
-      {/* Immersive Background */}
       <div className="absolute top-0 left-0 right-0 h-[60vh] z-0 overflow-hidden">
         {bgImage && (
           <img src={bgImage} alt="Backdrop" className="w-full h-full object-cover opacity-30 blur-2xl scale-110" />
@@ -130,9 +132,8 @@ export const MovieDetail: React.FC = () => {
 
       <div className="relative z-10 p-6 md:p-10 max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]">
         
-        {/* Navigation */}
         <button onClick={() => navigate('/movies')} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit group font-bold tracking-wide">
-          <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform duration-300 ease-out" /> BACK TO LIBRARY
+          <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform duration-300 ease-out" /> {t('common.back')}
         </button>
 
         {error && isAddingScore && (
@@ -143,7 +144,6 @@ export const MovieDetail: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 pt-4">
           
-          {/* Left: Poster */}
           <div className="md:col-span-4 lg:col-span-3 flex justify-center md:justify-start">
             {movie.poster_url ? (
               <img src={movie.poster_url} alt={movie.title} className="w-full max-w-sm rounded-2xl shadow-xl shadow-black/50 border border-slate-800/80 transition-all duration-300 hover:-translate-y-1" />
@@ -155,7 +155,6 @@ export const MovieDetail: React.FC = () => {
             )}
           </div>
 
-          {/* Right: Info & Scores */}
           <div className="md:col-span-8 lg:col-span-9 space-y-10">
             <div>
               <h1 className="text-5xl md:text-7xl font-black text-slate-50 mb-3 leading-none tracking-tighter drop-shadow-2xl">{movie.title}</h1>
@@ -164,10 +163,9 @@ export const MovieDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Massive Score Block */}
             <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 p-8 rounded-2xl w-fit shadow-xl shadow-black/50 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-slate-700/80">
                <div className="flex flex-col">
-                 <span className="text-slate-500 text-sm mb-2 uppercase tracking-widest font-black">Family Average</span>
+                 <span className="text-slate-500 text-sm mb-2 uppercase tracking-widest font-black">{t('hero.family_score')}</span>
                  <div className="flex items-end gap-3 text-amber-400">
                    <Star fill="currentColor" size={64} className="drop-shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
                    <span className="text-8xl font-black leading-none tracking-tighter drop-shadow-md">{movie.average_score?.toFixed(1) || '0.0'}</span>
@@ -178,25 +176,24 @@ export const MovieDetail: React.FC = () => {
 
             <div>
                <p className="text-slate-300 leading-relaxed text-xl max-w-4xl font-medium drop-shadow-md">
-                 {movie.overview || 'No overview available for this movie.'}
+                 {movie.overview || t('movie_detail.no_overview')}
                </p>
             </div>
 
-            {/* Family Ratings Grid */}
             <div className="pt-10">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-                 <h3 className="text-3xl font-black text-slate-50 tracking-tighter">Family Ratings</h3>
+                 <h3 className="text-3xl font-black text-slate-50 tracking-tighter">{t('movie_detail.family_ratings')}</h3>
                  {unratedPeople.length > 0 && !isAddingScore && (
                    <button onClick={() => setIsAddingScore(true)} className="flex items-center gap-2 bg-slate-900/60 hover:bg-slate-800/80 text-white px-6 py-4 rounded-2xl font-bold transition-all duration-300 ease-out active:scale-95 border border-slate-800/80 shadow-xl shadow-black/50 hover:-translate-y-1 w-fit">
-                     <PlusCircle size={18}/> Add Rating
+                     <PlusCircle size={18}/> {t('movie_detail.add_rating')}
                    </button>
                  )}
                  {isAddingScore && (
                    <div className="flex gap-3">
-                     <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">Cancel</button>
+                     <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">{t('common.cancel')}</button>
                      <button onClick={handleAddScoreClick} disabled={isSaving || !selectedPersonId || !newScore} className="flex items-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 disabled:opacity-50 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
                        {isSaving ? <Loader2 size={20} className="animate-spin"/> : null}
-                       Submit Rating
+                       {t('movie_detail.submit')}
                      </button>
                    </div>
                  )}
@@ -210,7 +207,7 @@ export const MovieDetail: React.FC = () => {
                       onChange={e => setSelectedPersonId(e.target.value)}
                       className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
                     >
-                      <option value="">-- Select Family Member --</option>
+                      <option value="">{t('movie_detail.select_member')}</option>
                       {unratedPeople.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
@@ -220,7 +217,7 @@ export const MovieDetail: React.FC = () => {
                       onChange={e => setNewScore(e.target.value)}
                       className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
                     >
-                      <option value="">-- Score --</option>
+                      <option value="">{t('movie_detail.select_score')}</option>
                       {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
                         <option key={val} value={val}>{val.toFixed(1)}</option>
                       ))}
@@ -229,16 +226,22 @@ export const MovieDetail: React.FC = () => {
                   <textarea 
                     value={newComment}
                     onChange={e => setNewComment(e.target.value)}
-                    placeholder="Optional review or comment..."
+                    placeholder={t('movie_detail.comment_placeholder')}
                     rows={3}
                     className="w-full bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 shadow-inner transition-colors resize-none placeholder:text-slate-500"
                   />
                 </div>
               )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              <motion.div 
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+              >
                 {(!movie.scoreList || movie.scoreList.length === 0) && (
-                  <div className="col-span-full py-12 text-slate-600 text-center border-2 border-dashed border-slate-800 rounded-2xl font-bold text-lg">No ratings yet.</div>
+                  <div className="col-span-full py-12 text-slate-600 text-center border-2 border-dashed border-slate-800 rounded-2xl font-bold text-lg">{t('movie_detail.no_ratings')}</div>
                 )}
                 {movie.scoreList?.map(score => {
                   let borderCol = 'border-amber-400/30';
@@ -248,7 +251,7 @@ export const MovieDetail: React.FC = () => {
                   else if (score.score < 8) { borderCol = 'border-slate-300/30'; textCol = 'text-slate-300'; bgCol = 'bg-slate-300/10'; }
 
                   return (
-                    <div key={score.id} className={`bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-800/80 transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:-translate-y-2 group ${score.comment ? 'col-span-2 sm:col-span-2 lg:col-span-2' : ''}`}>
+                    <motion.div variants={springUp} key={score.id} className={`bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-800/80 transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:-translate-y-2 group ${score.comment ? 'col-span-2 sm:col-span-2 lg:col-span-2' : ''}`}>
                       <div className="flex flex-col items-center text-center">
                         <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mb-4 shadow-inner transition-colors duration-300 ${borderCol} ${textCol} ${bgCol}`}>
                           {score.people?.name?.substring(0,2).toUpperCase()}
@@ -264,52 +267,79 @@ export const MovieDetail: React.FC = () => {
                           "{score.comment}"
                         </p>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sticky Bottom Action Bar for Delete */}
       <div className="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 bg-slate-900/60 backdrop-blur-md border-t border-slate-800/80 p-4 flex justify-end px-6 md:px-10 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-        <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 font-bold transition-all duration-300 ease-out p-2 rounded-xl hover:bg-red-500/10">
-          <Trash2 size={18}/> DELETE MOVIE
+        <button onClick={() => setShowDeleteModal(true)} className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 font-bold transition-all duration-300 ease-out p-2 rounded-xl hover:bg-red-500/10">
+          <Trash2 size={18}/> {t('movie_detail.delete_movie')}
         </button>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
-          <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80">
-            <h3 className="text-3xl font-black text-white mb-3 tracking-tighter">Delete Movie?</h3>
-            <p className="text-slate-400 mb-10 text-lg leading-relaxed font-medium">This will permanently remove <span className="text-white font-black">{movie.title}</span> and all associated family ratings from the database.</p>
+      <AnimatePresence>
+      {showDeleteModal && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+        >
+          <motion.div 
+            variants={scaleIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80"
+          >
+            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={32} />
+            </div>
+            <h2 className="text-2xl font-black text-white text-center mb-2">{t('movie_detail.confirm_delete')}</h2>
+            <p className="text-slate-400 mb-10 text-lg leading-relaxed font-medium text-center">{t('movie_detail.confirm_delete_movie')}</p>
             <div className="flex gap-4">
-              <button onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">Cancel</button>
-              <button onClick={confirmDelete} disabled={isDeleting} className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
+              <button onClick={() => setShowDeleteModal(false)} disabled={isDeleting} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 active:scale-95 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('movie_detail.cancel')}</button>
+              <button onClick={handleDeleteMovie} disabled={isDeleting} className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 active:scale-95 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
                 {isDeleting ? <Loader2 className="animate-spin" size={20} /> : null}
-                Delete
+                {t('movie_detail.confirm')}
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Custom Rating Confirmation Modal */}
+      <AnimatePresence>
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
-          <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80 text-center">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+        >
+          <motion.div 
+            variants={scaleIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80 text-center"
+          >
             <AlertCircle size={56} className="mx-auto text-amber-500 mb-6 drop-shadow-md" />
-            <h3 className="text-2xl font-black text-white mb-8 tracking-tighter">ส่งได้ครั้งเดียวแก้ไม่ได้แล้วนะ</h3>
+            <h3 className="text-2xl font-black text-white mb-8 tracking-tighter">{t('movie_detail.confirm_score_title')}</h3>
             <div className="flex gap-4">
-              <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">ยกเลิก</button>
-              <button onClick={executeAddScore} className="flex-1 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">ยืนยัน</button>
+              <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 active:scale-95 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('common.cancel')}</button>
+              <button onClick={executeAddScore} className="flex-1 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 active:scale-95 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">{t('movie_detail.confirm')}</button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -6,8 +6,12 @@ import { HeroBanner } from '../components/ui/HeroBanner';
 import { StatCard } from '../components/ui/StatCard';
 import { CarouselRow } from '../components/ui/CarouselRow';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { staggerContainer } from '../utils/animations';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const Dashboard: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [peopleCount, setPeopleCount] = useState(0);
@@ -33,8 +37,8 @@ export const Dashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  const { highestRatedMovie, highestRatedList, recentList, globalAvg } = useMemo(() => {
-    if (!movies.length) return { highestRatedMovie: null, highestRatedList: [], recentList: [], globalAvg: '0.0' };
+  const { highestRatedList, recentList, globalAvg } = useMemo(() => {
+    if (!movies.length) return { highestRatedList: [], recentList: [], globalAvg: '0.0' };
 
     const validScores = movies.filter(m => m.average_score && m.average_score > 0);
     
@@ -44,7 +48,6 @@ export const Dashboard: React.FC = () => {
       : validScores.filter(m => m.release_year?.toString() === filterYear);
 
     const sortedByScore = [...filteredForHighest].sort((a, b) => (b.average_score || 0) - (a.average_score || 0));
-    const highestRatedMovie = sortedByScore.length > 0 ? sortedByScore[0] : (movies[0] || null);
     const highestRatedList = sortedByScore.slice(0, 10);
     
     const recentList = [...movies].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10);
@@ -52,7 +55,7 @@ export const Dashboard: React.FC = () => {
     const totalScore = validScores.reduce((sum, m) => sum + Number(m.average_score), 0);
     const globalAvg = validScores.length ? (totalScore / validScores.length).toFixed(1) : '0.0';
 
-    return { highestRatedMovie, highestRatedList, recentList, globalAvg };
+    return { highestRatedList, recentList, globalAvg };
   }, [movies, filterYear]);
 
   const currentYear = new Date().getFullYear();
@@ -70,15 +73,15 @@ export const Dashboard: React.FC = () => {
     return (
       <div className="flex-1 min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-1000 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-900 to-slate-900">
         <Film size={80} className="text-slate-800 mb-8 drop-shadow-2xl" />
-        <h1 className="text-5xl md:text-6xl font-black text-slate-50 tracking-tighter mb-4 drop-shadow-lg">No Movies Yet</h1>
+        <h1 className="text-5xl md:text-6xl font-black text-slate-50 tracking-tighter mb-4 drop-shadow-lg">{t('dashboard.no_movies')}</h1>
         <p className="text-slate-400 text-lg max-w-lg mb-10 leading-relaxed font-medium">
-          Your cinematic journey starts here. Add your first movie to begin building your premium family collection.
+          {t('dashboard.no_movies_desc')}
         </p>
         <button 
           onClick={() => navigate('/add-movie')}
           className="flex items-center gap-3 px-10 py-5 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-2xl font-black text-lg transition-all duration-300 ease-out active:scale-95 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1"
         >
-          <PlusCircle size={24} className="fill-current drop-shadow-md" /> Add Your First Movie
+          <PlusCircle size={24} className="fill-current drop-shadow-md" /> {t('dashboard.add_first')}
         </button>
       </div>
     );
@@ -87,50 +90,56 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="pb-16 animate-in fade-in duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]">
       {/* Hero Section */}
-      <HeroBanner movie={highestRatedMovie} />
+      <HeroBanner movies={highestRatedList.slice(0, 5)} />
 
       {/* Main Content Area */}
-      <div className="px-6 md:px-16 -mt-16 relative z-20 space-y-16 md:space-y-24">
+      <div className="px-6 md:px-16 -mt-24 md:-mt-28 relative z-20 space-y-16 md:space-y-24">
         
         {/* Carousels */}
-        <div className="space-y-10 md:space-y-16">
+        <div className="space-y-8 md:space-y-12">
           <CarouselRow 
-            title="Highest Rated" 
+            title={t('dashboard.highest_rated')} 
             movies={highestRatedList} 
             actionElement={
               <select 
                 value={filterYear} 
                 onChange={e => setFilterYear(e.target.value)}
-                className="bg-slate-900/80 border border-slate-700/80 text-white rounded-xl px-4 py-2 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors text-sm"
+                className="bg-slate-900/80 border border-slate-700/80 text-white rounded-lg md:rounded-xl px-3 py-1.5 md:px-4 md:py-2 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors text-xs md:text-sm"
               >
                 {yearOptions.map(y => (
-                  <option key={y} value={y}>{y === "all" ? "All Time" : y}</option>
+                  <option key={y} value={y}>{y === "all" ? t('dashboard.all_time') : y}</option>
                 ))}
               </select>
             }
           />
-          <CarouselRow title="Recently Added" movies={recentList} />
+          <CarouselRow title={t('dashboard.recently_added')} movies={recentList} />
         </div>
 
         {/* Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+        >
           <StatCard 
-            title="Total Movies" 
+            title={t('dashboard.total_movies')} 
             value={movies.length} 
             icon={Film} 
           />
           <StatCard 
-            title="Overall Average" 
+            title={t('dashboard.overall_avg')} 
             value={globalAvg} 
             subtitle="/10"
             icon={Star} 
           />
           <StatCard 
-            title="Family Members" 
+            title={t('dashboard.family_members')} 
             value={peopleCount} 
             icon={Users} 
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   );

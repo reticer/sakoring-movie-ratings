@@ -4,6 +4,14 @@ export interface Person {
   created_at?: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  created_at: string;
+  sender_name: string;
+  message_type: 'text' | 'image' | 'file';
+  content: string;
+}
+
 export interface Score {
   id: number;
   movie_id: number;

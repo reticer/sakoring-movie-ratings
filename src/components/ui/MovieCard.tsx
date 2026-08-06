@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ImageOff, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Movie } from '../../types';
 import { RatingBadge } from './RatingBadge';
 import { dbService } from '../../services/dbService';
+import { springUp, scaleIn } from '../../utils/animations';
 
 interface MovieCardProps {
   movie: Movie;
@@ -51,9 +53,10 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) =
 
   return (
     <>
-      <div 
+      <motion.div 
+        variants={springUp}
         onClick={() => navigate(`/movies/${movie.id}`)}
-        className={`relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] hover:z-30 shadow-xl shadow-black/50 hover:shadow-2xl hover:shadow-black/70 border border-slate-800/80 ${rank ? 'ml-6 md:ml-10' : ''}`}
+        className={`relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 hover:z-30 shadow-xl shadow-black/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)] ${rank ? 'ml-6 md:ml-10' : ''}`}
       >
         {/* Netflix-style Rank Overlay */}
         {rank !== undefined && (
@@ -73,7 +76,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) =
           <img 
             src={movie.poster_url} 
             alt={movie.title} 
-            className="w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110" 
+            className="w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105" 
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-slate-700">
@@ -95,7 +98,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) =
           {/* Delete Button - Distinctly placed in overlay top-right */}
           <button 
             onClick={handleDeleteClick}
-            className="absolute top-3 right-3 p-2.5 bg-red-500/80 hover:bg-red-600 backdrop-blur-md text-white rounded-full transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 shadow-lg shadow-black/50 hover:scale-110 border border-red-400/50"
+            className="absolute top-3 right-3 p-2.5 bg-red-500/80 hover:bg-red-600 backdrop-blur-md text-white rounded-full transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 shadow-lg shadow-black/50 hover:scale-110 active:scale-95 border border-red-400/50"
             title="Delete Movie"
           >
             <Trash2 size={18} />
@@ -122,15 +125,23 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) =
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Safety Confirmation Modal */}
+      <AnimatePresence>
       {showDeleteConfirm && (
-        <div 
-          className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-200"
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[100] p-4"
           onClick={cancelDelete} // Clicking outside cancels
         >
-          <div 
+          <motion.div 
+            variants={scaleIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="bg-slate-800/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-6 max-w-sm w-full shadow-2xl shadow-black/80 flex flex-col items-center text-center"
             onClick={(e) => e.stopPropagation()} // Prevent clicking inside modal from closing it
           >
@@ -144,22 +155,23 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank }) =
               <button 
                 onClick={cancelDelete}
                 disabled={isDeleting} 
-                className="flex-1 px-4 py-3 bg-slate-700/60 hover:bg-slate-600/80 text-white rounded-xl font-bold transition-all duration-300 ease-out border border-slate-600/50"
+                className="flex-1 px-4 py-3 bg-slate-700/60 hover:bg-slate-600/80 active:scale-95 text-white rounded-xl font-bold transition-all duration-300 ease-out border border-slate-600/50"
               >
                 Cancel
               </button>
               <button 
                 onClick={confirmDelete}
                 disabled={isDeleting} 
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-xl font-black transition-all duration-300 ease-out shadow-lg shadow-black/30"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 active:scale-95 text-white rounded-xl font-black transition-all duration-300 ease-out shadow-lg shadow-black/30"
               >
                 {isDeleting ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
                 Delete
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </>
   );
 };

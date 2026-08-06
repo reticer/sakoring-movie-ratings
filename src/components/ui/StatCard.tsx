@@ -1,5 +1,7 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { springUp } from '../../utils/animations';
 
 interface StatCardProps {
   title: string;
@@ -10,7 +12,13 @@ interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, subtitle }) => {
   return (
-    <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 sm:p-10 flex flex-col justify-center shadow-xl shadow-black/50 transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-900/20 hover:border-red-500/30 group">
+    <motion.div 
+      variants={springUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 sm:p-10 flex flex-col justify-center shadow-xl shadow-black/50 transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-900/20 hover:border-red-500/30 group"
+    >
       <div className="flex items-center gap-4 mb-4">
         <div className="p-3 bg-red-600/10 text-red-600 rounded-xl group-hover:bg-red-600 group-hover:text-white transition-colors duration-500 shadow-inner">
           <Icon size={24} />
@@ -21,6 +29,6 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, su
         <span className="text-5xl font-black text-slate-50 tracking-tighter drop-shadow-md">{value}</span>
         {subtitle && <span className="text-lg text-slate-500 font-bold">{subtitle}</span>}
       </div>
-    </div>
+    </motion.div>
   );
 };

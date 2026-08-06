@@ -170,9 +170,9 @@ export const AddMovie: React.FC = () => {
             </div>
           )}
 
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible" style={{ pointerEvents: 'none' }} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {searchResults.map(movie => (
-              <motion.div variants={springUp} key={movie.id} className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-3 group hover:border-slate-700 transition-all">
+              <motion.div variants={springUp} key={movie.id} style={{ pointerEvents: 'auto' }} className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-3 group hover:border-slate-700 transition-all">
                 <div className="aspect-[2/3] w-full bg-slate-950 rounded-xl overflow-hidden mb-3 relative">
                   {movie.poster_path ? (
                     <img src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

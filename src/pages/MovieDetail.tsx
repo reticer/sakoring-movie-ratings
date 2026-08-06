@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, AlertTriangle } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, AlertTriangle, CheckCircle } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Movie, Person } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,7 @@ export const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [isAddingScore, setIsAddingScore] = useState(false);
   const [people, setPeople] = useState<Person[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<string>('');
@@ -27,9 +27,7 @@ export const MovieDetail: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      loadMovieData(Number(id));
-    }
+    if (id) loadMovieData(Number(id));
   }, [id]);
 
   const loadMovieData = async (movieId: number) => {
@@ -41,8 +39,8 @@ export const MovieDetail: React.FC = () => {
       ]);
       setMovie(data);
       setPeople(allPeople);
-    } catch (err) {
-      setError("Failed to load movie details.");
+    } catch {
+      setError('Failed to load movie details.');
     } finally {
       setLoading(false);
     }
@@ -59,21 +57,16 @@ export const MovieDetail: React.FC = () => {
       setIsSaving(true);
       const pId = Number(selectedPersonId);
       const scoreVal = parseFloat(newScore);
-
-      await dbService.addScore({ 
-        movie_id: Number(id), 
-        person_id: pId, 
-        score: scoreVal, 
-        comment: newComment.trim() || undefined 
+      await dbService.addScore({
+        movie_id: Number(id),
+        person_id: pId,
+        score: scoreVal,
+        comment: newComment.trim() || undefined
       });
-
       const currentScores = movie?.scoreList?.map(s => s.score) || [];
       const allScores = [...currentScores, scoreVal];
-      const sum = allScores.reduce((acc, curr) => acc + curr, 0);
-      const newAvg = parseFloat((sum / allScores.length).toFixed(2));
-      
+      const newAvg = parseFloat((allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2));
       await dbService.updateMovieDetails(Number(id), { average_score: newAvg });
-
       await loadMovieData(Number(id));
       setIsAddingScore(false);
       setSelectedPersonId('');
@@ -81,7 +74,7 @@ export const MovieDetail: React.FC = () => {
       setNewComment('');
       setError('');
     } catch (err: any) {
-      setError("Error adding score: " + err.message);
+      setError('Error adding score: ' + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -95,8 +88,8 @@ export const MovieDetail: React.FC = () => {
       setIsDeleting(true);
       await dbService.deleteMovie(movie.id);
       navigate('/movies');
-    } catch (err) {
-      setError("Failed to delete movie.");
+    } catch {
+      setError('Failed to delete movie.');
       setIsDeleting(false);
       setShowDeleteModal(false);
     }
@@ -109,236 +102,357 @@ export const MovieDetail: React.FC = () => {
   );
 
   if (error && !movie) return (
-    <div className="p-10 max-w-lg mx-auto text-center mt-32 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 shadow-xl shadow-black/50 transition-all duration-300">
-      <AlertCircle size={56} className="mx-auto text-red-500 mb-6 drop-shadow-md" />
-      <h3 className="text-3xl font-black text-slate-50 mb-3 tracking-tighter">Error</h3>
-      <p className="text-slate-400 mb-8 font-medium text-lg">{error}</p>
-      <button onClick={() => navigate('/movies')} className="bg-slate-800/60 hover:bg-slate-700/80 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('common.back')}</button>
+    <div className="p-10 max-w-lg mx-auto text-center mt-32">
+      <AlertCircle size={56} className="mx-auto text-red-500 mb-6" />
+      <h3 className="text-2xl font-black text-white mb-3">Error</h3>
+      <p className="text-slate-400 mb-8">{error}</p>
+      <button onClick={() => navigate('/movies')} className="bg-slate-800 text-white px-8 py-3 rounded-2xl font-bold">{t('common.back')}</button>
     </div>
   );
 
   if (!movie) return null;
 
   const bgImage = movie.poster_url?.replace('w500', 'original') || movie.poster_url;
+  const scoreColor = (s: number) => s >= 8 ? 'text-amber-400' : s >= 5 ? 'text-slate-300' : 'text-red-400';
+  const scoreBg = (s: number) => s >= 8 ? 'bg-amber-400/10 border-amber-400/30' : s >= 5 ? 'bg-slate-300/10 border-slate-300/30' : 'bg-red-400/10 border-red-400/30';
 
   return (
-    <div className="relative min-h-screen bg-slate-900 pb-24">
-      <div className="absolute top-0 left-0 right-0 h-[60vh] z-0 overflow-hidden">
-        {bgImage && (
-          <img src={bgImage} alt="Backdrop" className="w-full h-full object-cover opacity-30 blur-2xl scale-110" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/90 to-slate-900"></div>
+    <div className="relative min-h-screen bg-slate-950 pb-32">
+
+      {/* Blurred backdrop */}
+      <div className="absolute top-0 left-0 right-0 h-[55vh] z-0 overflow-hidden">
+        {bgImage && <img src={bgImage} alt="" className="w-full h-full object-cover opacity-25 blur-3xl scale-110" />}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/80 to-slate-950" />
       </div>
 
-      <div className="relative z-10 p-6 md:p-10 max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]">
-        
-        <button onClick={() => navigate('/movies')} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-fit group font-bold tracking-wide">
-          <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform duration-300 ease-out" /> {t('common.back')}
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-8 pt-4 md:pt-8">
+
+        {/* Back button */}
+        <button
+          onClick={() => navigate('/movies')}
+          className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors font-semibold mb-6 group"
+        >
+          <ChevronLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+          {t('common.back')}
         </button>
 
-        {error && isAddingScore && (
-          <div className="p-5 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl flex items-center gap-3">
-            <AlertCircle size={24} className="shrink-0" /> <p className="font-bold">{error}</p>
-          </div>
-        )}
+        {/* === HERO SECTION === */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 mb-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 pt-4">
-          
-          <div className="md:col-span-4 lg:col-span-3 flex justify-center md:justify-start">
+          {/* Poster */}
+          <div className="flex-shrink-0 mx-auto md:mx-0 w-40 md:w-52">
             {movie.poster_url ? (
-              <img src={movie.poster_url} alt={movie.title} className="w-full max-w-sm rounded-2xl shadow-xl shadow-black/50 border border-slate-800/80 transition-all duration-300 hover:-translate-y-1" />
+              <img
+                src={movie.poster_url}
+                alt={movie.title}
+                className="w-full rounded-2xl shadow-2xl shadow-black/70 ring-1 ring-white/10"
+              />
             ) : (
-              <div className="w-full max-w-sm aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center border border-slate-800/80 text-slate-700 shadow-xl shadow-black/50">
-                <ImageOff size={56} className="mb-4"/>
-                <span className="font-black tracking-widest uppercase text-sm">No Poster</span>
+              <div className="w-full aspect-[2/3] bg-slate-800 rounded-2xl flex flex-col items-center justify-center text-slate-600 ring-1 ring-white/5">
+                <ImageOff size={40} className="mb-2" />
+                <span className="text-xs font-bold uppercase tracking-wider">No Poster</span>
               </div>
             )}
           </div>
 
-          <div className="md:col-span-8 lg:col-span-9 space-y-10">
-            <div>
-              <h1 className="text-5xl md:text-7xl font-black text-slate-50 mb-3 leading-none tracking-tighter drop-shadow-2xl">{movie.title}</h1>
-              <div className="flex items-center gap-4 text-slate-300 font-bold text-lg">
-                {movie.release_year && <span className="px-4 py-1.5 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 drop-shadow-sm">{movie.release_year}</span>}
+          {/* Info */}
+          <div className="flex-1 flex flex-col justify-end text-center md:text-left">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-2 drop-shadow-lg">
+              {movie.title}
+            </h1>
+
+            {movie.release_year && (
+              <span className="inline-block text-sm font-bold text-slate-400 bg-slate-800/60 px-3 py-1 rounded-full w-fit mx-auto md:mx-0 mb-4">
+                {movie.release_year}
+              </span>
+            )}
+
+            {/* Score pill */}
+            <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
+              <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-white/8 rounded-2xl px-5 py-3 shadow-xl">
+                <Star size={20} className="text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                <span className="text-3xl font-black text-white">{movie.average_score?.toFixed(1) || '—'}</span>
+                <span className="text-slate-500 font-bold text-sm">/10</span>
               </div>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('hero.family_score')}</span>
             </div>
 
-            <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 p-8 rounded-2xl w-fit shadow-xl shadow-black/50 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-slate-700/80">
-               <div className="flex flex-col">
-                 <span className="text-slate-500 text-sm mb-2 uppercase tracking-widest font-black">{t('hero.family_score')}</span>
-                 <div className="flex items-end gap-3 text-amber-400">
-                   <Star fill="currentColor" size={64} className="drop-shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
-                   <span className="text-8xl font-black leading-none tracking-tighter drop-shadow-md">{movie.average_score?.toFixed(1) || '0.0'}</span>
-                   <span className="text-3xl text-slate-500 mb-2 font-black">/10</span>
-                 </div>
-               </div>
-            </div>
-
-            <div>
-               <p className="text-slate-300 leading-relaxed text-xl max-w-4xl font-medium drop-shadow-md">
-                 {movie.overview || t('movie_detail.no_overview')}
-               </p>
-            </div>
-
-            <div className="pt-10">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-                 <h3 className="text-3xl font-black text-slate-50 tracking-tighter">{t('movie_detail.family_ratings')}</h3>
-                 {unratedPeople.length > 0 && !isAddingScore && (
-                   <button onClick={() => setIsAddingScore(true)} className="flex items-center gap-2 bg-slate-900/60 hover:bg-slate-800/80 text-white px-6 py-4 rounded-2xl font-bold transition-all duration-300 ease-out active:scale-95 border border-slate-800/80 shadow-xl shadow-black/50 hover:-translate-y-1 w-fit">
-                     <PlusCircle size={18}/> {t('movie_detail.add_rating')}
-                   </button>
-                 )}
-                 {isAddingScore && (
-                   <div className="flex gap-3">
-                     <button onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }} className="text-slate-400 hover:text-white px-6 py-4 transition-colors font-bold rounded-2xl">{t('common.cancel')}</button>
-                     <button onClick={handleAddScoreClick} disabled={isSaving || !selectedPersonId || !newScore} className="flex items-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all duration-300 ease-out active:scale-95 disabled:opacity-50 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
-                       {isSaving ? <Loader2 size={20} className="animate-spin"/> : null}
-                       {t('movie_detail.submit')}
-                     </button>
-                   </div>
-                 )}
-              </div>
-
-              {isAddingScore && (
-                <div className="mb-8 flex flex-col gap-4 bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl shadow-black/50">
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <select 
-                      value={selectedPersonId}
-                      onChange={e => setSelectedPersonId(e.target.value)}
-                      className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
-                    >
-                      <option value="">{t('movie_detail.select_member')}</option>
-                      {unratedPeople.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                    <select 
-                      value={newScore}
-                      onChange={e => setNewScore(e.target.value)}
-                      className="flex-1 w-full sm:w-auto bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 cursor-pointer font-bold shadow-inner transition-colors"
-                    >
-                      <option value="">{t('movie_detail.select_score')}</option>
-                      {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
-                        <option key={val} value={val}>{val.toFixed(1)}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <textarea 
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder={t('movie_detail.comment_placeholder')}
-                    rows={3}
-                    className="w-full bg-slate-800/60 border border-slate-700/80 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 shadow-inner transition-colors resize-none placeholder:text-slate-500"
-                  />
-                </div>
-              )}
-
-              <motion.div 
-                variants={staggerContainer}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
-              >
-                {(!movie.scoreList || movie.scoreList.length === 0) && (
-                  <div className="col-span-full py-12 text-slate-600 text-center border-2 border-dashed border-slate-800 rounded-2xl font-bold text-lg">{t('movie_detail.no_ratings')}</div>
-                )}
-                {movie.scoreList?.map(score => {
-                  let borderCol = 'border-amber-400/30';
-                  let textCol = 'text-amber-400';
-                  let bgCol = 'bg-amber-400/10';
-                  if (score.score < 5) { borderCol = 'border-red-500/30'; textCol = 'text-red-500'; bgCol = 'bg-red-500/10'; }
-                  else if (score.score < 8) { borderCol = 'border-slate-300/30'; textCol = 'text-slate-300'; bgCol = 'bg-slate-300/10'; }
-
-                  return (
-                    <motion.div variants={springUp} key={score.id} className={`bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center justify-center border border-slate-800/80 transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:-translate-y-2 group ${score.comment ? 'col-span-2 sm:col-span-2 lg:col-span-2' : ''}`}>
-                      <div className="flex flex-col items-center text-center">
-                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mb-4 shadow-inner transition-colors duration-300 ${borderCol} ${textCol} ${bgCol}`}>
-                          {score.people?.name?.substring(0,2).toUpperCase()}
-                        </div>
-                        <span className="text-slate-50 font-bold text-lg line-clamp-1 mb-2 group-hover:text-white transition-colors">{score.people?.name}</span>
-                        <div className={`flex items-center gap-1.5 font-black text-2xl transition-colors duration-300 ${textCol}`}>
-                          <Star size={24} className="fill-current drop-shadow-md" />
-                          {score.score.toFixed(1)}
-                        </div>
-                      </div>
-                      {score.comment && (
-                        <p className="mt-4 text-slate-300 italic text-sm font-medium border-t border-slate-800/80 pt-4 w-full text-center">
-                          "{score.comment}"
-                        </p>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            </div>
+            {movie.overview && (
+              <p className="text-slate-400 text-sm md:text-base leading-relaxed line-clamp-3 md:line-clamp-none">
+                {movie.overview}
+              </p>
+            )}
           </div>
+        </div>
+
+        {/* === RATINGS SECTION === */}
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl shadow-black/50 mb-6">
+
+          {/* Section header */}
+          <div className="flex items-center justify-between p-5 border-b border-white/5">
+            <h3 className="text-base font-bold text-white">{t('movie_detail.family_ratings')}</h3>
+            {unratedPeople.length > 0 && (
+              <button
+                onClick={() => setIsAddingScore(true)}
+                className="flex items-center gap-1.5 text-sm font-bold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-xl transition-all active:scale-95"
+              >
+                <PlusCircle size={15} />
+                {t('movie_detail.add_rating')}
+              </button>
+            )}
+          </div>
+
+          {/* Remove inline form - now it's a modal */}
+
+          {/* Scores grid */}
+          <div className="p-5">
+            {(!movie.scoreList || movie.scoreList.length === 0) && (
+              <div className="py-12 text-center text-slate-600 font-semibold text-sm">
+                {t('movie_detail.no_ratings')}
+              </div>
+            )}
+
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              style={{ pointerEvents: 'none' }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
+              {movie.scoreList?.map(score => (
+                <motion.div
+                  variants={springUp}
+                  key={score.id}
+                  style={{ pointerEvents: 'auto' }}
+                  className="flex items-center gap-4 bg-slate-800/50 hover:bg-slate-800/80 border border-white/5 rounded-2xl px-4 py-3.5 transition-all duration-200"
+                >
+                  {/* Avatar */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border shrink-0 ${scoreBg(score.score)} ${scoreColor(score.score)}`}>
+                    {score.people?.name?.substring(0, 2).toUpperCase()}
+                  </div>
+
+                  {/* Name + comment */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white text-sm leading-tight">{score.people?.name}</p>
+                    {score.comment && (
+                      <p className="text-slate-500 text-xs mt-0.5 truncate">"{score.comment}"</p>
+                    )}
+                  </div>
+
+                  {/* Score badge */}
+                  <div className={`flex items-center gap-1 font-black text-base shrink-0 ${scoreColor(score.score)}`}>
+                    <Star size={14} className="fill-current" />
+                    {score.score.toFixed(1)}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Delete button — inline at bottom */}
+        <div className="flex justify-center pb-4">
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-red-500 transition-colors px-4 py-2.5 rounded-xl hover:bg-red-500/10 active:scale-95"
+          >
+            <Trash2 size={16} />
+            {t('movie_detail.delete_movie')}
+          </button>
         </div>
       </div>
 
-      <div className="fixed bottom-16 md:bottom-0 left-0 md:left-64 right-0 bg-slate-900/60 backdrop-blur-md border-t border-slate-800/80 p-4 flex justify-end px-6 md:px-10 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-        <button onClick={() => setShowDeleteModal(true)} className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 font-bold transition-all duration-300 ease-out p-2 rounded-xl hover:bg-red-500/10">
-          <Trash2 size={18}/> {t('movie_detail.delete_movie')}
-        </button>
-      </div>
-
+      {/* Add Score Modal */}
       <AnimatePresence>
-      {showDeleteModal && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
-        >
-          <motion.div 
-            variants={scaleIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80"
+        {isAddingScore && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }}
           >
-            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle size={32} />
-            </div>
-            <h2 className="text-2xl font-black text-white text-center mb-2">{t('movie_detail.confirm_delete')}</h2>
-            <p className="text-slate-400 mb-10 text-lg leading-relaxed font-medium text-center">{t('movie_detail.confirm_delete_movie')}</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowDeleteModal(false)} disabled={isDeleting} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 active:scale-95 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('movie_detail.cancel')}</button>
-              <button onClick={handleDeleteMovie} disabled={isDeleting} className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 active:scale-95 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">
-                {isDeleting ? <Loader2 className="animate-spin" size={20} /> : null}
-                {t('movie_detail.confirm')}
-              </button>
-            </div>
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+                    <Star size={16} className="fill-current" />
+                  </div>
+                  <h3 className="font-black text-white text-base">{t('movie_detail.add_rating')}</h3>
+                </div>
+                <button
+                  onClick={() => { setIsAddingScore(false); setSelectedPersonId(''); setNewScore(''); setNewComment(''); }}
+                  className="text-slate-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-800 transition-all text-xl font-light"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Form */}
+              <div className="p-5 space-y-3">
+                {error && (
+                  <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl">
+                    <AlertCircle size={14} /> {error}
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{t('movie_detail.select_member')}</label>
+                  <select
+                    value={selectedPersonId}
+                    onChange={e => setSelectedPersonId(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-500 cursor-pointer transition-colors"
+                  >
+                    <option value="">{t('movie_detail.select_member')}</option>
+                    {unratedPeople.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{t('movie_detail.select_score')}</label>
+                  <select
+                    value={newScore}
+                    onChange={e => setNewScore(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-500 cursor-pointer transition-colors"
+                  >
+                    <option value="">{t('movie_detail.select_score')}</option>
+                    {Array.from({ length: 20 }, (_, i) => 10.0 - i * 0.5).map(val => (
+                      <option key={val} value={val}>{val.toFixed(1)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{t('movie_detail.comment_placeholder')}</label>
+                  <textarea
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    placeholder="ความคิดเห็น (ไม่บังคับ)"
+                    rows={3}
+                    className="w-full bg-slate-800 border border-slate-700/80 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 resize-none placeholder:text-slate-600 transition-colors"
+                  />
+                </div>
+
+                <button
+                  onClick={handleAddScoreClick}
+                  disabled={isSaving || !selectedPersonId || !newScore}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white py-3.5 rounded-xl font-black transition-all active:scale-95 disabled:opacity-40 shadow-lg shadow-red-900/30 text-sm mt-1"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                  {t('movie_detail.submit')}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
       </AnimatePresence>
 
-      {/* Custom Rating Confirmation Modal */}
+      {/* Delete confirm modal */}
       <AnimatePresence>
-      {showConfirmModal && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
-        >
-          <motion.div 
-            variants={scaleIn}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-10 max-w-md w-full shadow-2xl shadow-black/80 text-center"
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
           >
-            <AlertCircle size={56} className="mx-auto text-amber-500 mb-6 drop-shadow-md" />
-            <h3 className="text-2xl font-black text-white mb-8 tracking-tighter">{t('movie_detail.confirm_score_title')}</h3>
-            <div className="flex gap-4">
-              <button onClick={() => setShowConfirmModal(false)} className="flex-1 px-4 py-4 bg-slate-800/60 hover:bg-slate-700/80 active:scale-95 text-white rounded-2xl font-bold transition-all duration-300 ease-out border border-slate-700/50 shadow-xl hover:-translate-y-1">{t('common.cancel')}</button>
-              <button onClick={executeAddScore} className="flex-1 px-4 py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 active:scale-95 text-white rounded-2xl font-black transition-all duration-300 ease-out shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1">{t('movie_detail.confirm')}</button>
-            </div>
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-[#111] border border-red-900/30 rounded-3xl w-full max-w-xs shadow-2xl shadow-black/60 p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-14 h-14 rounded-full bg-red-900/40 border border-red-800/50 flex items-center justify-center">
+                  <AlertTriangle size={26} className="text-red-500" />
+                </div>
+              </div>
+              {/* Text */}
+              <h2 className="text-lg font-black text-white text-center mb-2">{t('movie_detail.confirm_delete')}</h2>
+              <p className="text-slate-400 text-sm text-center leading-relaxed mb-6">{t('movie_detail.confirm_delete_movie')}</p>
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isDeleting}
+                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-2xl transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {t('movie_detail.cancel')}
+                </button>
+                <button
+                  onClick={handleDeleteMovie}
+                  disabled={isDeleting}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black text-sm rounded-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                  {t('movie_detail.confirm')}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Score confirm modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-6 flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 border border-amber-500/20">
+                  <Star size={26} className="fill-current" />
+                </div>
+                <h2 className="text-lg font-black text-white mb-1">{t('movie_detail.confirm_score_title')}</h2>
+                <p className="text-slate-400 text-sm mb-6">
+                  {people.find(p => String(p.id) === selectedPersonId)?.name} — <span className="text-white font-bold">{newScore}/10</span>
+                </p>
+              </div>
+              <div className="grid grid-cols-2 border-t border-white/5">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="py-4 text-white font-bold text-sm hover:bg-slate-800 transition-colors border-r border-white/5"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={executeAddScore}
+                  className="py-4 text-amber-400 font-black text-sm hover:bg-amber-500/10 transition-colors"
+                >
+                  {t('movie_detail.confirm')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

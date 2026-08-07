@@ -2,7 +2,7 @@ import React from 'react';
 import type { Movie } from '../../types';
 import { MovieCard } from './MovieCard';
 import { ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 import { LiveCommentCarousel } from './LiveCommentCarousel';
 
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -14,7 +14,7 @@ interface CarouselRowProps {
 }
 
 export const CarouselRow: React.FC<CarouselRowProps> = ({ title, movies, actionElement }) => {
-  const navigate = useNavigate();
+  const { navigate } = useApp();
   const { t } = useLanguage();
 
   return (

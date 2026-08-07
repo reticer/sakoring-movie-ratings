@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useApp } from '../contexts/AppContext';
 import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, AlertTriangle, CheckCircle } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Movie, Person } from '../types';
@@ -9,8 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 export const MovieDetail: React.FC = () => {
   const { t } = useLanguage();
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { activeMovieId: id, navigate, refreshData } = useApp();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -87,6 +86,7 @@ export const MovieDetail: React.FC = () => {
     try {
       setIsDeleting(true);
       await dbService.deleteMovie(movie.id);
+      await refreshData();
       navigate('/movies');
     } catch {
       setError('Failed to delete movie.');

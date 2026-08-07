@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useApp } from '../contexts/AppContext';
 import { Search, Loader2, Film, ImageOff, ChevronLeft, AlertCircle, PlusCircle, Users, CheckCircle2, Star } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Person, Movie } from '../types';
@@ -9,7 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 export const AddMovie: React.FC = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigate, refreshData } = useApp();
   const [step, setStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -134,6 +134,7 @@ export const AddMovie: React.FC = () => {
 
     try {
       await dbService.addMovieWithScores({ ...selectedMovie, average_score: average }, validScores);
+      await refreshData();
       navigate('/movies');
     } catch (err: any) {
       setError(err.message || t('error.save_movie'));

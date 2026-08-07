@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 import { ImageOff, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Movie } from '../../types';
@@ -16,7 +16,7 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank, className = '', style }) => {
-  const navigate = useNavigate();
+  const { navigate } = useApp();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -56,7 +56,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank, cla
   return (
     <>
       <div 
-        onClick={() => navigate(`/movies/${movie.id}`)}
+        onClick={() => navigate('/movies/detail', { id: movie.id })}
         className={`relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 hover:z-30 shadow-xl shadow-black/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)] ${rank ? 'ml-6 md:ml-10' : ''} ${className}`}
         style={style}
       >

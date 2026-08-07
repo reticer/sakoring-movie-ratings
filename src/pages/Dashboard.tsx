@@ -1,40 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Film, Users, Star, Activity, PlusCircle } from 'lucide-react';
-import { dbService } from '../services/dbService';
-import type { Movie } from '../types';
 import { HeroBanner } from '../components/ui/HeroBanner';
 import { StatCard } from '../components/ui/StatCard';
 import { CarouselRow } from '../components/ui/CarouselRow';
-import { useNavigate } from 'react-router-dom';
-
 import { useLanguage } from '../contexts/LanguageContext';
+import { useApp } from '../contexts/AppContext';
 
 export const Dashboard: React.FC = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [peopleCount, setPeopleCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { movies, peopleCount, loading, navigate } = useApp();
   const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [moviesData, peopleData] = await Promise.all([
-          dbService.getMoviesWithScores(),
-          dbService.getPeople()
-        ]);
-        setMovies(moviesData || []);
-        setPeopleCount((peopleData || []).length);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const { highestRatedList, recentList, globalAvg } = useMemo(() => {
     if (!movies.length) return { highestRatedList: [], recentList: [], globalAvg: '0.0' };

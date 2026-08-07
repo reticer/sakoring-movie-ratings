@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 import { Play, Star, Plus } from 'lucide-react';
 import type { Movie } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,7 @@ interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ movies }) => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigate } = useApp();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -87,13 +87,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ movies }) => {
 
           <div className="flex flex-wrap items-center gap-3 pt-2 md:pt-4">
             <button 
-              onClick={() => navigate(`/movies/${movie.id}`)}
+              onClick={() => navigate('/movies/detail', { id: movie.id })}
               className="flex items-center gap-2 px-5 py-2.5 md:px-8 md:py-3 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-xl md:rounded-2xl font-black text-sm md:text-lg tracking-wide transition-all duration-300 ease-out active:scale-95 shadow-xl shadow-black/50 hover:shadow-2xl hover:-translate-y-1"
             >
               <Play size={18} className="fill-current md:w-5 md:h-5" /> {t('hero.view_details')}
             </button>
             <button 
-              onClick={() => navigate(`/movies/${movie.id}`)}
+              onClick={() => navigate('/movies/detail', { id: movie.id })}
               className="flex items-center gap-2 px-5 py-2.5 md:px-8 md:py-3 bg-slate-900/60 hover:bg-slate-800/80 backdrop-blur-md text-white rounded-xl md:rounded-2xl font-black text-sm md:text-lg tracking-wide transition-all duration-300 ease-out active:scale-95 border border-slate-800/80 shadow-xl shadow-black/50 hover:-translate-y-1"
             >
               <Plus size={18} className="md:w-5 md:h-5" /> {t('hero.rate_now')}

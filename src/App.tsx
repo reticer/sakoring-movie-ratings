@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { AddMovie } from './pages/AddMovie';
@@ -7,22 +7,43 @@ import { MovieDetail } from './pages/MovieDetail';
 import { Chat } from './pages/Chat';
 import { Settings } from './pages/Settings';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { AppProvider, useApp } from './contexts/AppContext';
+
+const AppContent = () => {
+  const { currentPath } = useApp();
+
+  const renderContent = () => {
+    switch (currentPath) {
+      case '/':
+        return <Dashboard />;
+      case '/add-movie':
+        return <AddMovie />;
+      case '/movies':
+        return <Movies />;
+      case '/movies/detail':
+        return <MovieDetail />;
+      case '/chat':
+        return <Chat />;
+      case '/settings':
+        return <Settings />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
+  return (
+    <Layout>
+      {renderContent()}
+    </Layout>
+  );
+};
 
 export default function App() {
   return (
     <LanguageProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/add-movie" element={<AddMovie />} />
-            <Route path="/movies" element={<Movies />} />
-            <Route path="/movies/:id" element={<MovieDetail />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
     </LanguageProvider>
   );
 }

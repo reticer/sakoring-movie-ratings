@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Loader2, FilterX, CheckSquare, Square, Trash2, X, AlertTriangle } from 'lucide-react';
 import { dbService } from '../services/dbService';
-import type { Movie } from '../types';
+
 import { MovieCard } from '../components/ui/MovieCard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
+import { useApp } from '../contexts/AppContext';
 
 export const Movies: React.FC = () => {
   const { t, language } = useLanguage();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { movies, loading, refreshData } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_desc');
 
@@ -39,19 +39,7 @@ export const Movies: React.FC = () => {
     setVisibleCount(20);
   }, [searchQuery, sortBy]);
 
-  const loadMovies = async () => {
-    try {
-      setLoading(true);
-      const data = await dbService.getMoviesWithScores();
-      setMovies(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => { loadMovies(); }, []);
 
   const filteredMovies = useMemo(() => {
     let result = [...movies];
@@ -90,7 +78,7 @@ export const Movies: React.FC = () => {
       await Promise.all([...selected].map(id => dbService.deleteMovie(id)));
       setShowDeleteConfirm(false);
       exitSelectMode();
-      await loadMovies();
+      await refreshData();
     } catch (err) {
       console.error(err);
     } finally {
@@ -235,7 +223,7 @@ export const Movies: React.FC = () => {
                   )}
                 </button>
               )}
-              <MovieCard movie={movie} onDelete={() => loadMovies()} />
+              <MovieCard movie={movie} onDelete={() => refreshData()} />
             </div>
           ))}
         </div>

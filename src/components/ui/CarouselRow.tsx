@@ -5,7 +5,6 @@ import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LiveCommentCarousel } from './LiveCommentCarousel';
 import { motion } from 'framer-motion';
-import { staggerContainer } from '../../utils/animations';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CarouselRowProps {
@@ -38,23 +37,19 @@ export const CarouselRow: React.FC<CarouselRowProps> = ({ title, movies, actionE
           {t('dashboard.no_movies_year')}
         </div>
       ) : (
-        <motion.div 
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+        <div 
           className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-visible hide-scrollbar scroll-smooth snap-x snap-mandatory py-8 -mx-6 px-6 md:-mx-16 md:px-16"
         >
           {movies.map((movie, index) => {
             const currentRank = title === t('dashboard.highest_rated') ? index + 1 : undefined;
             return (
-              <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col">
+              <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col animate-card" style={{ animationDelay: `${(index + 1) * 100}ms` }}>
                 <MovieCard movie={movie} rank={currentRank} />
                 <LiveCommentCarousel scores={movie.scoreList || (movie as any).scores} rank={currentRank} />
               </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
       
       <style>{`

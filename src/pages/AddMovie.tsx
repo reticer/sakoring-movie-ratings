@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Loader2, Film, ImageOff, ChevronLeft, AlertCircle, PlusCircle, Users, CheckCircle2 } from 'lucide-react';
+import { Search, Loader2, Film, ImageOff, ChevronLeft, AlertCircle, PlusCircle, Users, CheckCircle2, Star } from 'lucide-react';
 import { dbService } from '../services/dbService';
 import type { Person, Movie } from '../types';
-import { motion } from 'framer-motion';
-import { staggerContainer, springUp } from '../utils/animations';
+import { motion, AnimatePresence } from 'framer-motion';
+import { springUp, scaleIn } from '../utils/animations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const AddMovie: React.FC = () => {
@@ -22,6 +22,7 @@ export const AddMovie: React.FC = () => {
   const [scores, setScores] = useState<Record<string, string>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const TMDB_API_KEY = localStorage.getItem('TMDB_API_KEY') || import.meta.env.VITE_TMDB_API_KEY || 'YOUR_TMDB_API_KEY';
 
@@ -96,7 +97,22 @@ export const AddMovie: React.FC = () => {
     setComments(prev => ({ ...prev, [personId]: val }));
   };
 
+  const validateAndShowConfirm = () => {
+    const validScores = Object.entries(scores)
+      .filter(([_, val]) => val !== '' && val !== null);
+      
+    if (validScores.length === 0) {
+      setError(t('add_movie.min_rating'));
+      return;
+    }
+    
+    setError('');
+    setShowConfirmModal(true);
+  };
+
   const handleSaveMovie = async () => {
+    setShowConfirmModal(false);
+    
     const validScores = Object.entries(scores)
       .filter(([_, val]) => val !== '' && val !== null)
       .map(([personId, val]) => ({ 
@@ -170,9 +186,9 @@ export const AddMovie: React.FC = () => {
             </div>
           )}
 
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" style={{ pointerEvents: 'none' }} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {searchResults.map(movie => (
-              <motion.div variants={springUp} key={movie.id} style={{ pointerEvents: 'auto' }} className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-3 group hover:border-slate-700 transition-all">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {searchResults.map((movie, index) => (
+              <div key={movie.id} className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-3 group hover:border-slate-700 transition-all animate-card" style={{ animationDelay: `${(index % 20) * 50}ms` }}>
                 <div className="aspect-[2/3] w-full bg-slate-950 rounded-xl overflow-hidden mb-3 relative">
                   {movie.poster_path ? (
                     <img src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -190,9 +206,9 @@ export const AddMovie: React.FC = () => {
                   {addingId === movie.id ? <Loader2 size={18} className="animate-spin" /> : <PlusCircle size={18} />}
                   {t('add_movie.add_to_library')}
                 </button>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -200,15 +216,19 @@ export const AddMovie: React.FC = () => {
              <button onClick={() => setStep(1)} className="text-slate-400 hover:text-white flex items-center gap-2 mb-4">
                 <ChevronLeft size={20} /> {t('common.back')}
              </button>
-            {selectedMovie?.poster_url ? (
-               <img src={selectedMovie.poster_url} alt="Poster" className="w-full rounded-2xl shadow-xl shadow-black/50 border border-slate-800/80" />
-            ) : (
-               <div className="w-full aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 flex items-center justify-center text-slate-700 shadow-xl"><ImageOff size={48} /></div>
-            )}
-            <div className="text-center">
-              <h2 className="text-xl font-black text-slate-50 leading-tight">{selectedMovie?.title}</h2>
-              <p className="text-slate-400 font-medium">{selectedMovie?.release_year}</p>
-            </div>
+             <div className="flex flex-row md:flex-col items-center md:items-start gap-6 md:gap-4">
+               <div className="w-28 sm:w-40 md:w-full shrink-0">
+                 {selectedMovie?.poster_url ? (
+                    <img src={selectedMovie.poster_url} alt="Poster" className="w-full rounded-2xl shadow-xl shadow-black/50 border border-slate-800/80" />
+                 ) : (
+                    <div className="w-full aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 flex items-center justify-center text-slate-700 shadow-xl"><ImageOff size={48} /></div>
+                 )}
+               </div>
+               <div className="text-left md:text-center flex-1">
+                 <h2 className="text-xl sm:text-2xl md:text-xl lg:text-2xl font-black text-slate-50 leading-tight mb-1">{selectedMovie?.title}</h2>
+                 <p className="text-slate-400 font-medium">{selectedMovie?.release_year}</p>
+               </div>
+             </div>
           </div>
 
           <div className="md:col-span-8 lg:col-span-9 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-6 sm:p-8 space-y-8 shadow-xl shadow-black/50 h-fit">
@@ -221,35 +241,40 @@ export const AddMovie: React.FC = () => {
                 <button onClick={() => navigate('/people')} className="text-red-500 hover:text-red-400 font-bold transition-colors">{t('add_movie.add_people_link')}</button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="divide-y divide-slate-800/60 bg-slate-900/40 rounded-2xl border border-slate-800/60 overflow-hidden">
                 {people.map(person => (
-                  <div key={person.id} className="flex flex-col gap-3 p-4 bg-slate-900/60 rounded-2xl border border-slate-800/80">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">
+                  <div key={person.id} className="p-3 sm:p-4 flex flex-col transition-colors hover:bg-slate-800/20">
+                    <div className="flex flex-row items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 truncate">
+                        <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700/50 flex items-center justify-center text-xs font-bold text-slate-300 shadow-sm shrink-0">
                           {person.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="font-medium text-slate-200">{person.name}</span>
+                        <span className="font-bold text-slate-100 text-sm sm:text-base truncate">{person.name}</span>
                       </div>
-                      <select 
-                        value={scores[person.id] || ''}
-                        onChange={e => handleScoreChange(person.id.toString(), e.target.value)}
-                        className="bg-slate-900 border border-slate-700 text-slate-50 rounded px-4 py-2 focus:outline-none focus:border-red-600 font-medium cursor-pointer"
-                      >
-                        <option value="">{t('add_movie.rate_placeholder')}</option>
-                        {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
-                          <option key={val} value={val}>{val.toFixed(1)}</option>
-                        ))}
-                      </select>
+                      <div className="w-[110px] sm:w-[140px] shrink-0">
+                        <select 
+                          value={scores[person.id] || ''}
+                          onChange={e => handleScoreChange(person.id.toString(), e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-700/80 text-white rounded-lg px-2 sm:px-3 py-2 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-bold shadow-sm transition-all text-xs sm:text-sm cursor-pointer appearance-none"
+                          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
+                        >
+                          <option value="">{t('add_movie.rate_placeholder')}</option>
+                          {Array.from({length: 20}, (_, i) => 10.0 - (i * 0.5)).map(val => (
+                            <option key={val} value={val}>{val.toFixed(1)}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     {scores[person.id] && (
-                      <textarea
-                        value={comments[person.id] || ''}
-                        onChange={e => handleCommentChange(person.id.toString(), e.target.value)}
-                        placeholder={t('add_movie.comment_placeholder')}
-                        rows={2}
-                        className="w-full bg-slate-800/40 border border-slate-700/60 text-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 shadow-inner transition-colors resize-none text-sm placeholder:text-slate-500"
-                      />
+                      <div className="ml-12 mt-2 pr-1">
+                        <input
+                          type="text"
+                          value={comments[person.id] || ''}
+                          onChange={e => handleCommentChange(person.id.toString(), e.target.value)}
+                          placeholder={t('add_movie.comment_placeholder')}
+                          className="w-full bg-transparent border-b border-slate-700/60 text-slate-300 px-1 py-1.5 focus:outline-none focus:border-red-500 transition-colors text-xs sm:text-sm placeholder:text-slate-600"
+                        />
+                      </div>
                     )}
                   </div>
                 ))}
@@ -258,17 +283,73 @@ export const AddMovie: React.FC = () => {
             
             <div className="pt-6 border-t border-slate-800">
               <button 
-                onClick={handleSaveMovie}
+                onClick={validateAndShowConfirm}
                 disabled={submitting || people.length === 0}
                 className="w-full py-4 bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white font-bold rounded-2xl transition-all duration-300 ease-out active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-black/50 hover:shadow-2xl"
               >
                 {submitting ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle2 size={20} />}
-                {submitting ? 'Saving to Database...' : 'Save Movie & Ratings'}
+                {submitting ? t('add_movie.saving_btn') : t('add_movie.save_btn')}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Score confirm modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-6 flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 border border-amber-500/20">
+                  <Star size={26} className="fill-current" />
+                </div>
+                <h2 className="text-lg font-black text-white mb-1">{t('movie_detail.confirm_score_title')}</h2>
+                <div className="text-slate-400 text-sm mb-6 flex flex-wrap gap-2 justify-center">
+                  {Object.entries(scores)
+                    .filter(([_, val]) => val !== '' && val !== null)
+                    .map(([personId, val], idx, arr) => {
+                      const person = people.find(p => String(p.id) === personId);
+                      return (
+                        <span key={personId}>
+                          {person?.name} <span className="text-white font-bold">{val}/10</span>
+                          {idx < arr.length - 1 && ', '}
+                        </span>
+                      );
+                    })}
+                </div>
+              </div>
+              <div className="p-6 pt-0 flex gap-3 w-full">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl transition-all active:scale-95 border border-slate-700/50"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleSaveMovie}
+                  className="flex-1 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/20"
+                >
+                  {t('movie_detail.confirm')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

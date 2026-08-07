@@ -7,7 +7,7 @@ import { StatCard } from '../components/ui/StatCard';
 import { CarouselRow } from '../components/ui/CarouselRow';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { staggerContainer } from '../utils/animations';
+
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const Dashboard: React.FC = () => {
@@ -116,30 +116,32 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Statistics Grid */}
-        <motion.div 
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+        <div 
           className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
         >
-          <StatCard 
-            title={t('dashboard.total_movies')} 
-            value={movies.length} 
-            icon={Film} 
-          />
-          <StatCard 
-            title={t('dashboard.overall_avg')} 
-            value={globalAvg} 
-            subtitle="/10"
-            icon={Star} 
-          />
-          <StatCard 
-            title={t('dashboard.family_members')} 
-            value={peopleCount} 
-            icon={Users} 
-          />
-        </motion.div>
+          <div className="animate-card" style={{ animationDelay: '100ms' }}>
+            <StatCard 
+              title={t('dashboard.total_movies')} 
+              value={movies.length} 
+              icon={Film} 
+            />
+          </div>
+          <div className="animate-card" style={{ animationDelay: '200ms' }}>
+            <StatCard 
+              title={t('dashboard.overall_avg')} 
+              value={globalAvg} 
+              subtitle="/10"
+              icon={Star} 
+            />
+          </div>
+          <div className="animate-card" style={{ animationDelay: '300ms' }}>
+            <StatCard 
+              title={t('dashboard.family_members')} 
+              value={peopleCount} 
+              icon={Users} 
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

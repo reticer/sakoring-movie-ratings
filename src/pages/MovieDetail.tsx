@@ -4,7 +4,7 @@ import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, 
 import { dbService } from '../services/dbService';
 import type { Movie, Person } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { staggerContainer, springUp, scaleIn } from '../utils/animations';
+import { springUp, scaleIn } from '../utils/animations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const MovieDetail: React.FC = () => {
@@ -213,20 +213,14 @@ export const MovieDetail: React.FC = () => {
               </div>
             )}
 
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              style={{ pointerEvents: 'none' }}
+            <div
               className="grid grid-cols-1 sm:grid-cols-2 gap-3"
             >
-              {movie.scoreList?.map(score => (
-                <motion.div
-                  variants={springUp}
+              {movie.scoreList?.map((score, index) => (
+                <div
                   key={score.id}
-                  style={{ pointerEvents: 'auto' }}
-                  className="flex items-center gap-4 bg-slate-800/50 hover:bg-slate-800/80 border border-white/5 rounded-2xl px-4 py-3.5 transition-all duration-200"
+                  className="flex items-center gap-4 bg-slate-800/50 hover:bg-slate-800/80 border border-white/5 rounded-2xl px-4 py-3.5 transition-all duration-200 animate-card"
+                  style={{ animationDelay: `${(index % 20) * 50}ms` }}
                 >
                   {/* Avatar */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border shrink-0 ${scoreBg(score.score)} ${scoreColor(score.score)}`}>
@@ -246,9 +240,9 @@ export const MovieDetail: React.FC = () => {
                     <Star size={14} className="fill-current" />
                     {score.score.toFixed(1)}
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -416,7 +410,7 @@ export const MovieDetail: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6"
             onClick={() => setShowConfirmModal(false)}
           >
             <motion.div
@@ -436,16 +430,16 @@ export const MovieDetail: React.FC = () => {
                   {people.find(p => String(p.id) === selectedPersonId)?.name} — <span className="text-white font-bold">{newScore}/10</span>
                 </p>
               </div>
-              <div className="grid grid-cols-2 border-t border-white/5">
+              <div className="p-6 pt-0 flex gap-3 w-full">
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="py-4 text-white font-bold text-sm hover:bg-slate-800 transition-colors border-r border-white/5"
+                  className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl transition-all active:scale-95 border border-slate-700/50"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   onClick={executeAddScore}
-                  className="py-4 text-amber-400 font-black text-sm hover:bg-amber-500/10 transition-colors"
+                  className="flex-1 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/20"
                 >
                   {t('movie_detail.confirm')}
                 </button>

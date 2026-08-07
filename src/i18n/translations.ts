@@ -55,6 +55,16 @@ export const translations = {
     'add_movie.add_to_library': 'เพิ่มลงคลัง',
     'add_movie.added': 'เพิ่มแล้ว',
     'add_movie.tmdb_error': 'กรุณาตั้งค่า TMDB API Key ในเมนูตั้งค่าก่อน',
+    'add_movie.rating_desc': 'ให้คะแนนและเพิ่มความคิดเห็นสำหรับภาพยนตร์เรื่องนี้',
+    'add_movie.rate_title': 'ให้คะแนน',
+    'add_movie.no_people': 'ยังไม่มีสมาชิกในครอบครัว',
+    'add_movie.add_people_link': 'เพิ่มสมาชิกตอนนี้',
+    'add_movie.rate_placeholder': 'เลือกคะแนน',
+    'add_movie.comment_placeholder': 'เพิ่มความคิดเห็น...',
+    'add_movie.min_rating': 'กรุณาให้คะแนนอย่างน้อย 1 คน',
+    'add_movie.already_exists': 'มีภาพยนตร์เรื่องนี้ในคลังแล้ว',
+    'add_movie.save_btn': 'บันทึกภาพยนตร์และคะแนน',
+    'add_movie.saving_btn': 'กำลังบันทึกลงฐานข้อมูล...',
 
     // Movie Detail
     'movie_detail.no_overview': 'ไม่มีข้อมูลเรื่องย่อ',
@@ -168,6 +178,16 @@ export const translations = {
     'add_movie.add_to_library': 'Add to Library',
     'add_movie.added': 'Added',
     'add_movie.tmdb_error': 'Please configure your TMDB API Key in Settings first.',
+    'add_movie.rating_desc': 'Rate and review this movie',
+    'add_movie.rate_title': 'Rate Movie',
+    'add_movie.no_people': 'No family members yet.',
+    'add_movie.add_people_link': 'Add members now',
+    'add_movie.rate_placeholder': 'Select Score',
+    'add_movie.comment_placeholder': 'Add a comment...',
+    'add_movie.min_rating': 'Please provide at least one rating.',
+    'add_movie.already_exists': 'This movie is already in your library.',
+    'add_movie.save_btn': 'Save Movie & Ratings',
+    'add_movie.saving_btn': 'Saving to Database...',
 
     // Movie Detail
     'movie_detail.no_overview': 'No overview available.',

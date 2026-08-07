@@ -4,7 +4,7 @@ import { dbService } from '../services/dbService';
 import type { Movie } from '../types';
 import { MovieCard } from '../components/ui/MovieCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { staggerContainer } from '../utils/animations';
+
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const Movies: React.FC = () => {
@@ -207,15 +207,11 @@ export const Movies: React.FC = () => {
           </div>
         </div>
       ) : (
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          style={{ pointerEvents: 'none' }}
+        <div
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-5"
         >
-          {filteredMovies.slice(0, visibleCount).map((movie) => (
-            <div key={movie.id} style={{ pointerEvents: 'auto' }} className="relative">
+          {filteredMovies.slice(0, visibleCount).map((movie, index) => (
+            <div key={movie.id} className="relative animate-card" style={{ animationDelay: `${(index % 20) * 50}ms` }}>
               {/* Selection overlay */}
               {selectMode && (
                 <button
@@ -242,7 +238,7 @@ export const Movies: React.FC = () => {
               <MovieCard movie={movie} onDelete={() => loadMovies()} />
             </div>
           ))}
-        </motion.div>
+        </div>
       )}
 
       {/* Infinite Scroll Trigger */}

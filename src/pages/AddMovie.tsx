@@ -142,7 +142,7 @@ export const AddMovie: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto w-full pb-32 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto w-full pb-32">
       <header className="mb-8 md:mb-10 text-center flex flex-col justify-center items-center">
         <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-6 shadow-inner">
           <Film size={32} />

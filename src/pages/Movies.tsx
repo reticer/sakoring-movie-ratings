@@ -109,7 +109,7 @@ export const Movies: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full pb-40 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto w-full pb-40">
 
       <header className="mb-6 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>

@@ -88,7 +88,7 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto w-full pb-32 animate-in fade-in duration-500">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto w-full pb-32">
       <header className="mb-6 flex flex-col justify-center">
         <h1 className="text-3xl md:text-4xl font-black text-slate-50 tracking-tight leading-tight">{t('settings.title')}</h1>
         <p className="text-sm text-slate-400 mt-1 font-medium">{t('settings.desc')}</p>

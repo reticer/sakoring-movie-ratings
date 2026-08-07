@@ -87,7 +87,7 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="pb-16 animate-in fade-in duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)]">
+    <div className="pb-16">
       {/* Hero Section */}
       <HeroBanner movies={highestRatedList.slice(0, 5)} />
 

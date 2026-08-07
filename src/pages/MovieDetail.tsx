@@ -4,7 +4,7 @@ import { AlertCircle, ChevronLeft, ImageOff, Trash2, PlusCircle, Loader2, Star, 
 import { dbService } from '../services/dbService';
 import type { Movie, Person } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { springUp, scaleIn } from '../utils/animations';
+import { scaleIn } from '../utils/animations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const MovieDetail: React.FC = () => {

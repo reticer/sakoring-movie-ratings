@@ -4,7 +4,7 @@ import { Search, Loader2, Film, ImageOff, ChevronLeft, AlertCircle, PlusCircle, 
 import { dbService } from '../services/dbService';
 import type { Person, Movie } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { springUp, scaleIn } from '../utils/animations';
+import { scaleIn } from '../utils/animations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const AddMovie: React.FC = () => {

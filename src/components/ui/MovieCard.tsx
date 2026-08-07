@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Movie } from '../../types';
 import { RatingBadge } from './RatingBadge';
 import { dbService } from '../../services/dbService';
-import { springUp, scaleIn } from '../../utils/animations';
+import { scaleIn } from '../../utils/animations';
 
 interface MovieCardProps {
   movie: Movie;

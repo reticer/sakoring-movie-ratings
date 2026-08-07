@@ -4,7 +4,7 @@ import { MovieCard } from './MovieCard';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LiveCommentCarousel } from './LiveCommentCarousel';
-import { motion } from 'framer-motion';
+
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CarouselRowProps {

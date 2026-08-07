@@ -6,7 +6,6 @@ import { HeroBanner } from '../components/ui/HeroBanner';
 import { StatCard } from '../components/ui/StatCard';
 import { CarouselRow } from '../components/ui/CarouselRow';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 import { useLanguage } from '../contexts/LanguageContext';
 

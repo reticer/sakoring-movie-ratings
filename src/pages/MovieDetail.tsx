@@ -381,21 +381,21 @@ export const MovieDetail: React.FC = () => {
               <h2 className="text-lg font-black text-white text-center mb-2">{t('movie_detail.confirm_delete')}</h2>
               <p className="text-slate-400 text-sm text-center leading-relaxed mb-6">{t('movie_detail.confirm_delete_movie')}</p>
               {/* Buttons */}
-              <div className="flex gap-3">
+              <div className="flex justify-center gap-4 w-full">
                 <button
-                  onClick={() => setShowDeleteModal(false)}
+                  onClick={() => !isDeleting && setShowDeleteModal(false)}
                   disabled={isDeleting}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-2xl transition-all active:scale-95 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#222] hover:bg-[#333] active:scale-95 text-white rounded-full font-bold transition-all disabled:opacity-50 text-sm border border-white/10"
                 >
-                  {t('movie_detail.cancel')}
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteMovie}
                   disabled={isDeleting}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black text-sm rounded-2xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="px-6 py-2.5 bg-red-600 hover:bg-red-500 active:scale-95 text-white rounded-full font-black transition-all disabled:opacity-50 shadow-lg shadow-red-900/50 text-sm flex items-center justify-center gap-2 min-w-[100px]"
                 >
-                  {isDeleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                  {t('movie_detail.confirm')}
+                  {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={15} />}
+                  {t('common.delete')}
                 </button>
               </div>
             </motion.div>

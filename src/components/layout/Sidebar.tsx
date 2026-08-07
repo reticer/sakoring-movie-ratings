@@ -50,7 +50,7 @@ export const Sidebar: React.FC = () => {
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-3xl border-t border-white/5 z-[9999] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 z-[9999] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         <div className="flex justify-around items-center h-[88px]">
           {navItems.map((item) => {
             const isActive = currentPath === item.to || (currentPath === '/movies/detail' && item.to === '/movies');
@@ -58,6 +58,7 @@ export const Sidebar: React.FC = () => {
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
+                style={{ touchAction: 'manipulation' }}
                 className={`flex flex-col items-center justify-center w-full h-full space-y-1.5 transition-all duration-300 ${
                   isActive ? 'text-slate-50 -translate-y-1' : 'text-slate-500 hover:text-slate-300'
                 }`}

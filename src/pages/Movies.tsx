@@ -27,11 +27,13 @@ export const Movies: React.FC = () => {
   const lastElementRef = (node: HTMLDivElement | null) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();
+    
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
         setVisibleCount(prev => prev + 20);
       }
-    }, { rootMargin: '200px' });
+    }, { rootMargin: '100px' }); // Load slightly before reaching the very bottom
+    
     if (node) observer.current.observe(node);
   };
 
@@ -199,7 +201,7 @@ export const Movies: React.FC = () => {
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-5"
         >
           {filteredMovies.slice(0, visibleCount).map((movie, index) => (
-            <div key={movie.id} className="relative animate-card" style={{ animationDelay: `${(index % 20) * 50}ms` }}>
+            <div key={movie.id} className="relative animate-card" style={{ animationDelay: `${Math.min(index % 20, 10) * 50}ms` }}>
               {/* Selection overlay */}
               {selectMode && (
                 <button
@@ -231,8 +233,8 @@ export const Movies: React.FC = () => {
 
       {/* Infinite Scroll Trigger */}
       {!loading && visibleCount < filteredMovies.length && (
-        <div ref={lastElementRef} className="w-full py-10 flex justify-center">
-          <Loader2 className="animate-spin text-slate-500" size={24} />
+        <div ref={lastElementRef} className="w-full py-12 flex justify-center">
+          <Loader2 className="animate-spin text-slate-500" size={32} />
         </div>
       )}
 

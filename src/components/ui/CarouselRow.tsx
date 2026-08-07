@@ -43,7 +43,7 @@ export const CarouselRow: React.FC<CarouselRowProps> = ({ title, movies, actionE
           {movies.map((movie, index) => {
             const currentRank = title === t('dashboard.highest_rated') ? index + 1 : undefined;
             return (
-              <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col animate-card" style={{ animationDelay: `${(index + 1) * 100}ms` }}>
+              <div key={movie.id} className="flex-none w-[150px] md:w-[220px] snap-start flex flex-col animate-card" style={{ animationDelay: `${(Math.min(index, 5) + 1) * 100}ms` }}>
                 <MovieCard movie={movie} rank={currentRank} />
                 <LiveCommentCarousel scores={movie.scoreList || (movie as any).scores} rank={currentRank} />
               </div>

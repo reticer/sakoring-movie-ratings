@@ -213,27 +213,27 @@ export const AddMovie: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="md:col-span-4 lg:col-span-3 space-y-4">
+           <div className="md:col-span-4 lg:col-span-3 space-y-4">
              <button onClick={() => setStep(1)} className="text-slate-400 hover:text-white flex items-center gap-2 mb-4">
                 <ChevronLeft size={20} /> {t('common.back')}
              </button>
-             <div className="flex flex-row md:flex-col items-center md:items-start gap-6 md:gap-4">
-               <div className="w-28 sm:w-40 md:w-full shrink-0">
+             <div className="flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-4">
+               <div className="w-20 sm:w-28 md:w-full shrink-0">
                  {selectedMovie?.poster_url ? (
                     <img src={selectedMovie.poster_url} alt="Poster" className="w-full rounded-2xl shadow-xl shadow-black/50 border border-slate-800/80" />
                  ) : (
-                    <div className="w-full aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 flex items-center justify-center text-slate-700 shadow-xl"><ImageOff size={48} /></div>
+                    <div className="w-full aspect-[2/3] bg-slate-900/60 rounded-2xl border border-slate-800/80 flex items-center justify-center text-slate-700 shadow-xl"><ImageOff size={32} /></div>
                  )}
                </div>
                <div className="text-left md:text-center flex-1">
-                 <h2 className="text-xl sm:text-2xl md:text-xl lg:text-2xl font-black text-slate-50 leading-tight mb-1">{selectedMovie?.title}</h2>
-                 <p className="text-slate-400 font-medium">{selectedMovie?.release_year}</p>
+                 <h2 className="text-lg sm:text-xl md:text-xl lg:text-2xl font-black text-slate-50 leading-tight mb-1">{selectedMovie?.title}</h2>
+                 <p className="text-sm text-slate-400 font-medium">{selectedMovie?.release_year}</p>
                </div>
              </div>
           </div>
 
-          <div className="md:col-span-8 lg:col-span-9 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800/80 p-6 sm:p-8 space-y-8 shadow-xl shadow-black/50 h-fit">
-            <h3 className="text-2xl font-bold text-slate-50 border-b border-slate-800 pb-4">{t('add_movie.rate_title')}</h3>
+          <div className="md:col-span-8 lg:col-span-9 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl shadow-black/50 h-fit">
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-50 border-b border-slate-700/50 pb-3 sm:pb-4">{t('add_movie.rate_title')}</h3>
             
             {people.length === 0 ? (
               <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/50">
@@ -242,21 +242,21 @@ export const AddMovie: React.FC = () => {
                 <button onClick={() => navigate('/people')} className="text-red-500 hover:text-red-400 font-bold transition-colors">{t('add_movie.add_people_link')}</button>
               </div>
             ) : (
-              <div className="divide-y divide-slate-800/60 bg-slate-900/40 rounded-2xl border border-slate-800/60 overflow-hidden">
+              <div className="divide-y divide-slate-700/50 bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden">
                 {people.map(person => (
-                  <div key={person.id} className="p-3 sm:p-4 flex flex-col transition-colors hover:bg-slate-800/20">
-                    <div className="flex flex-row items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 truncate">
-                        <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700/50 flex items-center justify-center text-xs font-bold text-slate-300 shadow-sm shrink-0">
+                  <div key={person.id} className="p-3 flex flex-col transition-colors hover:bg-slate-800/40">
+                    <div className="flex flex-row items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 truncate">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-600/50 flex items-center justify-center text-[10px] font-bold text-slate-300 shadow-sm shrink-0">
                           {person.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="font-bold text-slate-100 text-sm sm:text-base truncate">{person.name}</span>
+                        <span className="font-bold text-slate-100 text-sm truncate">{person.name}</span>
                       </div>
-                      <div className="w-[110px] sm:w-[140px] shrink-0">
+                      <div className="w-[90px] sm:w-[120px] shrink-0">
                         <select 
                           value={scores[person.id] || ''}
                           onChange={e => handleScoreChange(person.id.toString(), e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700/80 text-white rounded-lg px-2 sm:px-3 py-2 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-bold shadow-sm transition-all text-xs sm:text-sm cursor-pointer appearance-none"
+                          className="w-full bg-slate-950 border border-slate-600/80 text-white rounded-lg px-2 py-1.5 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-bold shadow-sm transition-all text-xs sm:text-sm cursor-pointer appearance-none"
                           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
                         >
                           <option value="">{t('add_movie.rate_placeholder')}</option>
@@ -333,16 +333,16 @@ export const AddMovie: React.FC = () => {
                     })}
                 </div>
               </div>
-              <div className="p-6 pt-0 flex gap-3 w-full">
+              <div className="p-6 pt-0 flex justify-center gap-4 w-full">
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl transition-all active:scale-95 border border-slate-700/50"
+                  className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-full transition-all active:scale-95 border border-slate-700/50"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSaveMovie}
-                  className="flex-1 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/20"
+                  className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm rounded-full transition-all active:scale-95 shadow-lg shadow-amber-500/20"
                 >
                   {t('movie_detail.confirm')}
                 </button>

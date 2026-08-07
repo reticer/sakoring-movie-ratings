@@ -57,7 +57,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onDelete, rank, cla
     <>
       <div 
         onClick={() => navigate('/movies/detail', { id: movie.id })}
-        className={`relative aspect-[2/3] bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 hover:z-30 shadow-xl shadow-black/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)] ${rank ? 'ml-6 md:ml-10' : ''} ${className}`}
+        className={`relative aspect-[2/3] bg-slate-800 border border-slate-700/50 rounded-2xl overflow-visible cursor-pointer group transition-all duration-300 ease-out hover:scale-[1.03] active:scale-95 hover:z-30 shadow-xl shadow-black/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)] ${rank ? 'ml-6 md:ml-10' : ''} ${className}`}
         style={style}
       >
         {/* Netflix-style Rank Overlay */}

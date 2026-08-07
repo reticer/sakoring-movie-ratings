@@ -95,12 +95,9 @@ export const Settings: React.FC = () => {
       </header>
 
       <div className="space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-10px' }}
-          transition={{ duration: 0.4 }}
-          className="bg-slate-900/60 backdrop-blur-xl transform-gpu rounded-3xl overflow-hidden shadow-sm border border-slate-800/80"
+        <div
+          className="animate-card bg-slate-900/60 backdrop-blur-xl transform-gpu rounded-3xl overflow-hidden shadow-sm border border-slate-800/80"
+          style={{ animationDelay: '100ms' }}
         >
           {/* Language */}
           <button onClick={() => setShowLangModal(true)} className="w-full flex items-center justify-between p-5 bg-transparent hover:bg-slate-800/50 active:bg-slate-800/80 transition-colors border-b border-slate-800/80 group">
@@ -166,15 +163,12 @@ export const Settings: React.FC = () => {
               <ChevronRight size={20} />
             </div>
           </button>
-        </motion.div>
+        </div>
 
         {/* Danger Zone */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-10px' }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="bg-slate-900/60 backdrop-blur-xl transform-gpu rounded-3xl overflow-hidden shadow-sm border border-red-900/30"
+        <div
+          className="animate-card bg-slate-900/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-sm border border-red-900/30"
+          style={{ animationDelay: '200ms' }}
         >
           <button onClick={() => setShowDeleteChatModal(true)} className="w-full flex items-center justify-between p-5 bg-transparent hover:bg-red-500/5 active:bg-red-500/10 transition-colors group">
             <div className="flex items-center gap-4">
@@ -190,7 +184,7 @@ export const Settings: React.FC = () => {
               <ChevronRight size={20} />
             </div>
           </button>
-        </motion.div>
+        </div>
 
         <div className="text-center pt-4 opacity-50">
           <p className="text-xs font-bold text-slate-400 tracking-widest">SAKORING V2.0.0</p>

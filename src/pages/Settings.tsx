@@ -8,27 +8,13 @@ import { supabase } from '../api/supabaseClient';
 
 export const Settings: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
-  const [showTmdbModal, setShowTmdbModal] = useState(false);
   const [showDataModal, setShowDataModal] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [showDeleteChatModal, setShowDeleteChatModal] = useState(false);
   const [deletingChat, setDeletingChat] = useState(false);
-  const [tmdbKey, setTmdbKey] = useState('');
-  const [saved, setSaved] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string }>({ type: 'success', msg: '' });
-
-  useEffect(() => {
-    const key = localStorage.getItem('TMDB_API_KEY') || '';
-    setTmdbKey(key);
-  }, []);
-
-  const handleSaveTmdbKey = () => {
-    localStorage.setItem('TMDB_API_KEY', tmdbKey);
-    setSaved(true);
-    setTimeout(() => { setSaved(false); setShowTmdbModal(false); }, 1000);
-  };
 
   const handleExport = async () => {
     try {
@@ -116,21 +102,6 @@ export const Settings: React.FC = () => {
             </div>
           </button>
 
-          {/* TMDB API Key */}
-          <button onClick={() => setShowTmdbModal(true)} className="w-full flex items-center justify-between p-5 bg-transparent hover:bg-slate-800/50 active:bg-slate-800/80 transition-colors border-b border-slate-800/80 group">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
-                <Key size={20} />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="font-bold text-slate-200">{t('settings.tmdb_key')}</span>
-                <span className="text-xs font-medium text-slate-500">{t('settings.tmdb_desc')}</span>
-              </div>
-            </div>
-            <div className="text-slate-500 group-hover:text-white transition-colors">
-              <ChevronRight size={20} />
-            </div>
-          </button>
 
           {/* Data Management */}
           <button onClick={() => { setStatus({ type: 'success', msg: '' }); setShowDataModal(true); }} className="w-full flex items-center justify-between p-5 bg-transparent hover:bg-slate-800/50 active:bg-slate-800/80 transition-colors border-b border-slate-800/80 group">
@@ -191,33 +162,6 @@ export const Settings: React.FC = () => {
         </div>
       </div>
 
-      {/* TMDB Modal */}
-      <AnimatePresence>
-        {showTmdbModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="bg-slate-900/90 backdrop-blur-xl rounded-3xl w-full max-w-md flex flex-col shadow-2xl shadow-black/80 border border-slate-800">
-              <div className="p-5 border-b border-slate-800 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500"><Key size={16} /></div>
-                  <h2 className="text-lg font-bold text-white">{t('settings.tmdb_key')}</h2>
-                </div>
-                <button onClick={() => setShowTmdbModal(false)} className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-700 hover:text-white transition-all active:scale-90"><X size={18} /></button>
-              </div>
-              <div className="p-6 space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-400 mb-2">Access Token (v3 auth)</label>
-                  <input type="text" value={tmdbKey} onChange={(e) => setTmdbKey(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-colors shadow-inner text-white font-medium" placeholder="Enter your TMDB API Key..." />
-                  <p className="text-xs text-slate-500 mt-2">Get your key from <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer" className="text-red-500 hover:underline">The Movie Database (TMDB)</a></p>
-                </div>
-                <button onClick={handleSaveTmdbKey} className="w-full bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-black/50">
-                  {saved ? <CheckCircle2 size={18} /> : <Save size={18} />}
-                  {saved ? t('settings.saved') : t('settings.save_key')}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Data Management Modal */}
       <AnimatePresence>

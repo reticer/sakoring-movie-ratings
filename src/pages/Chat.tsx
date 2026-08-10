@@ -49,11 +49,12 @@ export const Chat: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    // Snap instantly on load or message history update
+    scrollToBottom('auto');
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
   const fetchMessages = async () => {

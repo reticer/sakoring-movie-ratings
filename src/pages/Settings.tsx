@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FileJson, Key, ChevronRight, X, Save, CheckCircle2, Download, Upload, AlertCircle, Loader2, Globe, Users, MessageSquareX, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileJson, ChevronRight, X, CheckCircle2, Download, Upload, AlertCircle, Loader2, Globe, Users, MessageSquareX, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dbService } from '../services/dbService';
 import { useLanguage } from '../contexts/LanguageContext';

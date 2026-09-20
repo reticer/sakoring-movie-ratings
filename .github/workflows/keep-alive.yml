@@ -18,9 +18,6 @@ jobs:
             echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY in GitHub Secrets!"
             exit 1
           fi
-          curl -f -i -X POST "${SUPABASE_URL}/rest/v1/keep_alive?on_conflict=id" \
+          curl -f -i -X GET "${SUPABASE_URL}/rest/v1/movies?select=id&limit=1" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates,return=representation" \
-            -d '{"id": 1, "last_ping": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}"
